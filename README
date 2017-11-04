@@ -10,3 +10,6 @@ for Homebrew users, install formulas are:
 brew install sdl2
 
 brew install sdl2_image
+
+After installing necessary packages, simply run make. The 
+program compiles to a.out.
