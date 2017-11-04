@@ -1,0 +1,12 @@
+This program relies on the SDL2 and SDL2 image_libraries.
+For Advanced Packaging Tool users, use the commands:
+
+apt-get install libsdl2-dev
+
+apt-get install libsdl2-image-dev 
+
+for Homebrew users, install formulas are:
+
+brew install sdl2
+
+brew install sdl2_image
