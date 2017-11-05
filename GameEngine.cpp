@@ -160,7 +160,7 @@ void GameEngine::run(){
         
         //animate only if there was horizontal movement. Otherwise, just re-render.
         if (motion)
-            player.animate(4, renderer);
+            player.animate(3, renderer);
         else
             player.render(renderer);
 
