@@ -13,3 +13,48 @@ brew install sdl2_image
 
 After installing necessary packages, simply run make. The 
 program compiles to a.out.
+
+
+====================================================================
+
+
+For Windows installation, using Microsoft Visual Studio:
+
+Download the SDL2 headers and binaries from the SDL website,
+libsdl.org/download-2.0.php
+
+Under Development Libraries, you'll find a link to the .zip file labeled
+for Visual C++
+
+Open Visual Studio and start a new, empty project.
+Click Project->Properties, then under Configuration Properties click
+VC++ Directories. In the Include Directories field, select edit.
+Add the include folder, located amongst the SDL2 files you just
+downloaded and unzipped. This allows Visual Studio acces to the SDL2
+header files.
+
+Next, in Configuration Properties->VC++ Directories, select Library Directories
+and, like the previous step, select edit and add the lib folder. Inside
+of lib there are two folders, x64 and x86. Add the x86 folder, regardless of
+the architecture of your OS.
+
+Next, still in Configuration Properties, select Linker->Input, and under 
+Additional Dependencies, select edit. In the available field, type
+
+SDL2.lib;
+SDL2main.lib;
+
+and click OK.
+
+Then, still in Configuration Properties, select Linker->System, and under
+SubSystem, select Console.
+
+Lastly, find the SDL2.dll file within the lib folder previously extracted,
+and copy it into either your projects working directory, or your system 
+directory (C:\WINDOWS\SYSTEM32 for x86, C:\Windows\SysWOW64 for x64)
+
+
+
+
+
+
