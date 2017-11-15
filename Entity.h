@@ -3,8 +3,8 @@
 #define Entity_h
 
 #include <stdio.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 
 /* Defines parameters for any moving objects that can interact with one another.
  * this includes monsters as well as the player character.
@@ -40,11 +40,11 @@ public:
      * provided renderer.
      */
     
-    void animate(int speed, SDL_Renderer* renderer);
+    void animate(int speed, SDL_Renderer* renderer, int camX, int camY);
     
     //Re-render the player without animation
     
-    void render(SDL_Renderer* renderer);
+    void render(SDL_Renderer* renderer, int camX, int camY);
     
     //Adjusts the source rectangle used in rendering to a different animation track
     
@@ -69,6 +69,7 @@ public:
      ***********/
     double getxPos();
     double getyPos();
+	double getYVel();
     int getHeight();
     int getWidth();
     int bottom();

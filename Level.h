@@ -4,8 +4,8 @@
 #define Level_h
 
 #include <stdio.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 #include <vector>
 
 /* Contains the background as well as any static foreground elements
@@ -19,8 +19,13 @@ public:
     
     void addTerrainRect(SDL_Rect *rect);
     
+	//load background image and render
+	void renderBG(int x, int y, SDL_Rect* camera, SDL_Renderer* renderer);
+	void setBG(SDL_Texture* bgTex);
+	
     //getters
-    std::vector<SDL_Rect> getTerrain();
+	//getTerrain() returns reference for camera operation in GameEngine.cpp
+    std::vector<SDL_Rect>& getTerrain();
     
     size_t numWalls();
     
@@ -30,6 +35,8 @@ private:
     
     //Vector containing all walls and platforms in the level
     std::vector<SDL_Rect> terrain;
+
+	
 };
 
 #endif /* Level_h */
