@@ -67,9 +67,10 @@ public:
     /***********
      * GETTERS *
      ***********/
-    double getxPos();
-    double getyPos();
+    int getxPos();
+    int getyPos();
 	double getYVel();
+	double getXVel();
     int getHeight();
     int getWidth();
     int bottom();

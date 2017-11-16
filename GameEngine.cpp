@@ -20,7 +20,7 @@ GameEngine::GameEngine(){
     //add platforms for the player to stand on
     level.addTerrain(0, 400, 350, 20);
     level.addTerrain(400, 450, 300, 20);
-	level.addTerrain(500, 300, 300, 20);
+	level.addTerrain(450, 300, 300, 20);
 	level.addTerrain(800, 400, 300, 20);
     
 	
@@ -73,7 +73,7 @@ GameEngine::~GameEngine(){
 void GameEngine::run(){
     
     /* The SDL_Event object will be used only to poll for
-     * a quit event. Keyboard input will be handled
+     * a quit event, and to handle player jumping . Keyboard input will be handled
      * later.
      */
     
@@ -99,13 +99,29 @@ void GameEngine::run(){
         motion = false;
         SDL_PollEvent(&event);
     
-        switch (event.type) {
-            case SDL_QUIT:
-                running = false;
-                break;
+		switch (event.type) {
+			case SDL_QUIT:
+				running = false;
+				break;
+			default:
+				break;
+		}
+		//jumping handled as event to avoid player hopping continuously when UP held down
+		if(event.type == SDL_KEYDOWN && event.key.repeat == 0){
+				switch (event.key.keysym.sym) {
+				case SDLK_UP:
+					//We only want to jump if the player is actually sitting on something
+					for (int i = 0; i < level.numWalls(); i++) {
+						if (isOnTop(*player.getPos(), level.getTerrain()[i])) {
+							player.jump();
+							break;
+						}
+					}
+				default:
+					break;
+				}
                 
-            default:
-                break;
+            
         }
     
         /* Here we handle keyboard input. First, we initialize an array containing the current state
@@ -114,17 +130,7 @@ void GameEngine::run(){
          */
         
          const Uint8* keyStates = SDL_GetKeyboardState( NULL );
-        
-        if( keyStates[ SDL_SCANCODE_UP ] )
-        {
-            //We only want to jump if the player is actually sitting on something
-            for (int i = 0; i < level.numWalls(); i++){
-                if (isOnTop(*player.getPos(), level.getTerrain()[i])){
-                    player.jump();
-                    break;
-                }
-            }
-        }
+       
         
         if( keyStates[ SDL_SCANCODE_DOWN ] )
         {
@@ -156,17 +162,40 @@ void GameEngine::run(){
         //apply gravity
         player.fall();
 
-        //update player position
-        player.move();
+       
 
-		/* Here we check for collision after adjusting entity positions.
-		* if collisions are detected, we move the player to the top of the
-		* SDL_Rect with which it is colliding.
+		/* Here we update the player position (previously done
+		* with the move() function) and check for collision.
+		* Upon collision, the players position is reverted 
+		* back to prohibit further movement in the x or y
+		* directions.
 		*/
 		
+		
+		player.setXPos(player.getxPos() + player.getXVel());
 		for (int i = 0; i < level.numWalls(); i++)
 			if (checkCollision(level.getTerrain()[i], *player.getPos()))
-				player.setYPos(level.getTerrain()[i].y - player.getHeight());
+				player.setXPos(player.getxPos() - player.getXVel());
+				
+		player.setYPos(player.getyPos() + player.getYVel());
+		for (int i = 0; i < level.numWalls(); i++)
+			if (checkCollision(level.getTerrain()[i], *player.getPos()))
+			{
+				player.setYPos(player.getyPos() - player.getYVel());
+				/* Reverting the players y postion after collision
+				* will occasionally result in a y postion slightly lower
+				* than the platform on which the player stands. This
+				* makes the isOnTop() function return false and breaks
+				* the ability to jump. This problem is "fixed" with 
+				* the following if-statement.
+				*/
+				if(player.getyPos() < level.getTerrain()[i].y)
+					player.setYPos(level.getTerrain()[i].y - player.getHeight());
+			}
+		
+		
+				
+
 	
 
 		//center camera over the player

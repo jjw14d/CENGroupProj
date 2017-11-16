@@ -156,14 +156,17 @@ SDL_Rect* Entity::getPos(){
     return &position;
 }
 
-double Entity::getxPos(){
+int Entity::getxPos(){
     return position.x;
 }
 
-double Entity::getyPos(){
+int Entity::getyPos(){
     return position.y;
 }
 
+double Entity::getXVel() {
+	return xVel;
+}
 double Entity::getYVel() {
 	return yVel;
 }
