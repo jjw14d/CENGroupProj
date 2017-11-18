@@ -5,9 +5,10 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include <string>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 
 #include "Entity.h"
 #include "Level.h"
@@ -54,8 +55,8 @@ private:
     std::vector<Entity> monsters;
     
     //window dimensions
-    int winW;
-    int winH;
+    //int winW;
+	//int winH;
     
     //flag for the game loop
     bool running;

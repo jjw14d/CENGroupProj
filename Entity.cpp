@@ -69,20 +69,24 @@ void Entity::jump(){
 }
 
 void Entity::fall(){
-    if (yVel < 15)
-        yVel += 1;
+	if (yVel < 15)
+		yVel += 1;
+	
 }
 
 //Animation
 
-void Entity::animate(int speed, SDL_Renderer* renderer){
+void Entity::animate(int speed, SDL_Renderer* renderer, int camX, int camY){
     
+	
     animationProgress++;
-    
+	
     if (animationProgress % speed == 0){
         advance();
     }
-    SDL_RenderCopy(renderer, spriteSheet, &animationFrame, &position);
+	//player is rendered in renderSpace, relative to camera by subtracting offset
+	SDL_Rect renderSpace = { position.x - camX, position.y - camY, animationFrame.w, animationFrame.h };
+    SDL_RenderCopy(renderer, spriteSheet, &animationFrame, &renderSpace);
 
 }
 
@@ -101,8 +105,10 @@ void Entity::switchAnimationChannel(int channel){
     }
 }
 
-void Entity::render(SDL_Renderer* renderer){
-    SDL_RenderCopy(renderer, spriteSheet, &animationFrame, &position);
+void Entity::render(SDL_Renderer* renderer, int camX, int camY){
+
+	SDL_Rect renderSpace = { position.x - camX, position.y - camY, animationFrame.w, animationFrame.h };
+    SDL_RenderCopy(renderer, spriteSheet, &animationFrame, &renderSpace);
 }
 
 void Entity::advance(){
@@ -150,12 +156,19 @@ SDL_Rect* Entity::getPos(){
     return &position;
 }
 
-double Entity::getxPos(){
+int Entity::getxPos(){
     return position.x;
 }
 
-double Entity::getyPos(){
+int Entity::getyPos(){
     return position.y;
+}
+
+double Entity::getXVel() {
+	return xVel;
+}
+double Entity::getYVel() {
+	return yVel;
 }
 
 int Entity::getHeight(){
