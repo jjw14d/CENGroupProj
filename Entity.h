@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_image.h>
-
+#undef main
 /* Defines parameters for any moving objects that can interact with one another.
  * this includes monsters as well as the player character.
  */
@@ -117,6 +117,38 @@ public:
 private:
     
 };
+
+
+class Monster : public Entity
+{
+public:
+    Monster();
+
+    //Constructor to initialize Monster position
+
+    Monster(double x, double y);
+    virtual void Activity();
+    virtual void animate(int speed, SDL_Renderer* renderer, int camX, int camY);
+    void Die();
+    bool Dead();
+private:
+    bool dead;
+};
+
+class PlatformWalker : public Monster
+{
+public:
+    PlatformWalker();
+
+    PlatformWalker(double x, double y);
+    virtual void Activity();
+    void setPlatform(int l, int r);
+    void setPlatform(const SDL_Rect &);
+private:
+    int leftEnd;
+    int rightEnd;
+};
+
 
 
 #endif /* Entity_h */
