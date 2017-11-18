@@ -13,6 +13,7 @@
 #include "Entity.h"
 #include "Level.h"
 
+#undef main
 /* This class is in charge of initializing and managing
  * all in-game elements as well as starting the game loop.
  */
@@ -54,6 +55,11 @@ private:
     //Monster vector
     std::vector<Entity> monsters;
     
+    /* For now each monster type has a different vector 
+     * Still trying to work out a solution for this so that all monsters can be in one vector and controlled in one loop in gameengine*/
+    std::vector<PlatformWalker> walkers;
+
+
     //window dimensions
     //int winW;
 	//int winH;

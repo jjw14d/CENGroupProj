@@ -58,6 +58,22 @@ GameEngine::GameEngine(){
 	//load background image
 	level.setBG(loadGraphics("bg.png"));
     
+    // create a few enemies
+    walkers.push_back(PlatformWalker());
+    walkers.back().setPlatform(level.getTerrain()[1]);
+    walkers.back().setPosRect(100, 100, 400, 350);
+    walkers.back().setSpriteSheet(loadGraphics("somersault.png"));
+
+    walkers.push_back(PlatformWalker());
+    walkers.back().setPlatform(level.getTerrain()[1]);
+    walkers.back().setPosRect(100, 100, 600, 350);
+    walkers.back().setSpriteSheet(loadGraphics("somersault.png"));
+
+    walkers.push_back(PlatformWalker());
+    walkers.back().setPlatform(level.getTerrain()[3]);
+    walkers.back().setPosRect(100, 100, 800, 300);
+    walkers.back().setSpriteSheet(loadGraphics("somersault.png"));
+
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, player.getTexture(), NULL,NULL);
     SDL_RenderPresent(renderer);
@@ -90,8 +106,7 @@ void GameEngine::run(){
 	
     player.animate(4, renderer, camera.x, camera.y);
 	
-	
-    
+       
     SDL_RenderPresent(renderer);
     
     SDL_Event event;
@@ -247,6 +262,23 @@ void GameEngine::run(){
 			
 		}
 		
+        for (auto itr = walkers.begin(); itr != walkers.end(); ++itr)
+        {
+            if (checkCollision(*itr->getPos(), *player.getPos()))
+            {
+                walkers.erase(itr);
+                break;  // don't collide with 2 walkers at once
+                        // also iterators can be weird when you erase them
+            }
+        }
+        for (auto itr = walkers.begin(); itr != walkers.end(); ++itr)
+        {
+            itr->Activity();
+        }
+        for (int i = 0; i < walkers.size(); ++i)
+        {
+            walkers[i].animate(3, renderer, camera.x, camera.y);
+        }
 		
         //animate only if there was horizontal movement. Otherwise, just re-render.
         if (motion)
