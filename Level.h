@@ -4,8 +4,8 @@
 #define Level_h
 
 #include <stdio.h>
-#include <SDL.h>
-#include <SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <vector>
 
 /* Contains the background as well as any static foreground elements
@@ -14,29 +14,46 @@
 class Level{
 public:
     
-    //add a wall or platform to the level
+    ~Level();
+    /******
+     * TERRAIN MANAGEMENT
+     ******/
     void addTerrain(int x, int y, int w, int h);
     
     void addTerrainRect(SDL_Rect *rect);
     
-	//load background image and render
+	/*******
+     * TEXTURE RENDERING AND LOADING
+     *******/
 	void renderBG(int x, int y, SDL_Rect* camera, SDL_Renderer* renderer);
-	void setBG(SDL_Texture* bgTex);
-	
-    //getters
+    
+    //Sets the active background texture to the element at extraTextures[index].
+	void setBG(int index);
+    
+    /* Adds a texture to the extraTextures vector. The new texture can be swapped
+     * in as the new active texture using the setBG function.
+     */
+    void addTexture(SDL_Texture* newTex);
+                    
+    /*******
+     * GETTERS
+     *******/
+                    
 	//getTerrain() returns reference for camera operation in GameEngine.cpp
     std::vector<SDL_Rect>& getTerrain();
     
     size_t numWalls();
     
 private:
-    //A texture to render as the level background
+    
+    //Active texture to render as the level background
     SDL_Texture* background;
     
+    //Vector of additional background textures that can be switched in as the active texture.
+    std::vector<SDL_Texture*> extraTextures;
+    
     //Vector containing all walls and platforms in the level
-    std::vector<SDL_Rect> terrain;
-
-	
+    std::vector<SDL_Rect> terrain;	
 };
 
 #endif /* Level_h */

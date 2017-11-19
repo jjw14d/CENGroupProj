@@ -8,10 +8,9 @@
  */
 
 Entity::Entity(){
-    position.x = 0;
-    position.y = 0;
-    position.w = 0;
-    position.h = 0;
+    position = {0,0,0,0};
+    savedPosition = {0,0,0,0};
+    
     
     animationFrame.x = 0;
     animationFrame.y = 0;
@@ -21,6 +20,8 @@ Entity::Entity(){
     
     xVel = 0;
     yVel = 0;
+    
+    hitPoints = 10;
 }
 
 
@@ -30,6 +31,8 @@ Entity::Entity(double h, double w, SDL_Texture* spriteTex){
     position.h = h;
     position.w = w;
     
+    savedPosition = {0,0,0,0};
+    
     animationFrame.x = 0;
     animationFrame.y = 0;
     animationFrame.h = h;
@@ -37,6 +40,8 @@ Entity::Entity(double h, double w, SDL_Texture* spriteTex){
     
     xVel = 0;
     yVel = 0;
+    
+    hitPoints = 10;
     
     spriteSheet = spriteTex;
 }
@@ -123,7 +128,17 @@ void Entity::advance(){
         animationFrame.x = 0;
 }
 
-//setters
+void Entity::savePosition(){
+    savedPosition = position;
+}
+
+void Entity::loadPosition(){
+    position = savedPosition;
+}
+
+/***********
+ * SETTERS *
+ ***********/
 void Entity::setSpriteSheet(SDL_Texture* spriteTex){
     spriteSheet = spriteTex;
 }
@@ -146,7 +161,21 @@ void Entity::setYPos(int y){
     position.y = y;
 }
 
-//getters
+void Entity::decrementHitPoints(int decrement){
+    hitPoints -= decrement;
+    if (hitPoints < 0)
+        hitPoints = 0;
+}
+
+void Entity::incrementHitPoints(int increment){
+    hitPoints += increment;
+    if (hitPoints > 10)
+        hitPoints = 0;
+}
+
+/***********
+ * GETTERS *
+ ***********/
 
 SDL_Texture* Entity::getTexture(){
     return spriteSheet;
@@ -187,6 +216,9 @@ int Entity::right(){
     return position.x + position.w;
 }
 
+int Entity::getHP(){
+    return hitPoints;
+}
 
 
 /*

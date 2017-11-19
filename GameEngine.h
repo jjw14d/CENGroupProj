@@ -7,8 +7,8 @@
 #include <vector>
 #include <string>
 
-#include <SDL.h>
-#include <SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #include "Entity.h"
 #include "Level.h"
@@ -53,6 +53,9 @@ private:
     
     //Monster vector
     std::vector<Entity> monsters;
+    
+    //Vector of menu textures
+    std::vector<SDL_Texture*> menuTex;
     
     //window dimensions
     //int winW;

@@ -2,6 +2,12 @@
 
 #include "Level.h"
 
+Level::~Level(){
+    for (int i = 0; i < extraTextures.size(); i++) {
+        SDL_DestroyTexture(extraTextures[i]);
+    }
+}
+
 void Level::addTerrain(int x, int y, int w, int h){
     SDL_Rect newTerrain;
     newTerrain.x = x;
@@ -12,7 +18,9 @@ void Level::addTerrain(int x, int y, int w, int h){
     terrain.push_back(newTerrain);
 }
 
-//getters
+/***********
+ * GETTERS *
+ ***********/
 
 std::vector<SDL_Rect>& Level::getTerrain(){
     return terrain;
@@ -21,6 +29,10 @@ std::vector<SDL_Rect>& Level::getTerrain(){
 size_t Level::numWalls(){
     return terrain.size();
 }
+
+/**********************
+ * TEXTURE MANAGEMENT *
+ **********************/
 
 void Level::renderBG(int x, int y, SDL_Rect* camera, SDL_Renderer* renderer) {
 	//only portion of background in camera's view will be rendered
@@ -31,8 +43,10 @@ void Level::renderBG(int x, int y, SDL_Rect* camera, SDL_Renderer* renderer) {
 }
 
 
-void Level::setBG(SDL_Texture* bgTex) {
-	background = bgTex;
+void Level::setBG(int index) {
+    background = extraTextures[index];
 }
 
-
+void Level:: addTexture(SDL_Texture* newTex){
+    extraTextures.push_back(newTex);
+}
