@@ -161,18 +161,6 @@ void Entity::setYPos(int y){
     position.y = y;
 }
 
-void Entity::decrementHitPoints(int decrement){
-    hitPoints -= decrement;
-    if (hitPoints < 0)
-        hitPoints = 0;
-}
-
-void Entity::incrementHitPoints(int increment){
-    hitPoints += increment;
-    if (hitPoints > 10)
-        hitPoints = 0;
-}
-
 /***********
  * GETTERS *
  ***********/
@@ -216,10 +204,6 @@ int Entity::right(){
     return position.x + position.w;
 }
 
-int Entity::getHP(){
-    return hitPoints;
-}
-
 
 /*
  **********
@@ -227,12 +211,148 @@ int Entity::getHP(){
  **********
  */
 
-Player::Player() : Entity(){
-    
+Player::Player() : Entity()
+{
+	level = 1;
+	currentExp = 0; //start with a new character at level 1 with 0 experience
+	levelUpExp = 100;
+	currentHealth = 100;
+	maxHealth = 100;
+	baseAttack = 10;
+	baseDefence = 10;   
 }
 
-Player::Player(double x, double y) : Entity(x,y){
-    
+Player::Player(double x, double y) : Entity(x,y)
+{
+	level = 1;
+	currentExp = 0;
+	levelUpExp = 100;
+	currentHealth = 100;
+	maxHealth = 100;
+	baseAttack = 10;
+	baseDefence = 10;   
 }
 
+int Player::attack()
+{
+	return baseAttack;	
+}
 
+void Player::getHit(int damage)
+{
+	currentHealth = currentHealth - damage;
+}
+
+bool Player::checkLevelUp()
+{
+	if (currentExp >= levelUpExp)
+		return true;
+	else if (currentExp < levelUpExp)
+		return false;
+}
+
+void Player::levelUp()
+{
+	level++; //increment the player level
+	maxHealth = maxHealth + 10; 
+	currentHealth = currentHealth + 10;//health boost for level up, but not a full heal
+	baseAttack = baseAttack + 2;
+	baseDefence = baseDefence + 2;
+	levelUpExp = levelUpExp + 25; //raise the bar to level up
+}
+
+void Player::addExp(int expValue)
+{
+	currentExp = currentExp + expValue;
+	if (checkLevelUp())
+	{
+		currentExp = currentExp % (levelUpExp + 25); //make sure they don't lose experience past a level
+		levelUp();
+	}
+}
+
+int Player::getLevel()
+{
+	return level;
+}
+
+int Player::getCurrentExp()
+{
+	return currentExp;
+}
+
+int Player::getlevelUpExp()
+{
+	return levelUpExp;
+}
+
+int Player::getHealth()
+{
+	return currentHealth;
+}
+
+int Player::getBaseAttack()
+{
+	return baseAttack;
+}
+
+int Player::getBaseDefence()
+{
+	return baseDefence;
+}
+
+int Player::getMaxHealth()
+{
+	return maxHealth;
+}
+
+/*Monster*/
+
+Monster::Monster() : Entity()
+{
+	//generate default level 1 monsters
+	currentHealth = 25;
+	maxHealth = 25;
+	baseAttack = 5;
+	baseDefence = 5; //default values for combat stats
+	expValue = 25;
+}
+
+Monster::Monster(double x, double y, SDL_Texture* spriteTex, int playerLevel) : Entity(x, y, spriteTex)
+{
+	maxHealth = 20 + (playerLevel * 5); //scale stats with player level
+	currentHealth = maxHealth;
+	baseAttack = 3 + (playerLevel * 2);
+	baseDefence = 3 + (playerLevel * 2);
+	expValue = 20 + (playerLevel * 5);
+}
+
+int Player::attack()
+{
+	return baseAttack;
+}
+
+void Monster::getHit(int damage)
+{
+	currentHealth = currentHealth - damage;
+}
+
+int Monster::getHealth()
+{
+	return currentHealth;
+}
+
+int Monster::getBaseAttack()
+{
+	return baseAttack;
+}
+
+int Monster::getBaseDefence()
+{
+	return baseDefence;
+}
+
+int Monster::getmaxHealth()
+{
+	return maxHealth;
+}
