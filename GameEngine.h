@@ -6,14 +6,17 @@
 #include <iostream>
 #include <vector>
 #include <string>
-
+/*
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+*/
 #include <SDL.h>
 #include <SDL_image.h>
+#undef main
 
 #include "Entity.h"
 #include "Level.h"
 
-#undef main
 /* This class is in charge of initializing and managing
  * all in-game elements as well as starting the game loop.
  */
@@ -53,13 +56,11 @@ private:
     Level level;
     
     //Monster vector
-    std::vector<Entity> monsters;
-    
-    /* For now each monster type has a different vector 
-     * Still trying to work out a solution for this so that all monsters can be in one vector and controlled in one loop in gameengine*/
     std::vector<PlatformWalker> walkers;
-
-
+    
+    //Vector of menu textures
+    std::vector<SDL_Texture*> menuTex;
+    
     //window dimensions
     //int winW;
 	//int winH;

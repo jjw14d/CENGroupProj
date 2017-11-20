@@ -3,9 +3,14 @@
 #define Entity_h
 
 #include <stdio.h>
+/*
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+*/
 #include <SDL.h>
 #include <SDL_image.h>
-#undef main
+
+
 /* Defines parameters for any moving objects that can interact with one another.
  * this includes monsters as well as the player character.
  */
@@ -54,7 +59,13 @@ public:
     
     void advance();
     
+    //Save the Entity's current position to the "savedPosition" member.
     
+    void savePosition();
+    
+    //Load savedPosition to position/
+    
+    void loadPosition();
     
     /***********
      * SETTERS *
@@ -63,6 +74,8 @@ public:
     void setPosRect(int h, int w, int x = 0, int y = 0);
     void setXPos(int x);
     void setYPos(int y);
+    void decrementHitPoints(int decrement);
+    void incrementHitPoints(int increment);
     
     /***********
      * GETTERS *
@@ -75,6 +88,7 @@ public:
     int getWidth();
     int bottom();
     int right();
+    int getHP();
     
     SDL_Texture* getTexture();
     SDL_Rect* getPos();
@@ -100,10 +114,18 @@ protected:
     
     SDL_Rect position;
     
+    //Temporary SDL_Rect to save the object's position when we switch to battle mode.
+    
+    SDL_Rect savedPosition;
+    
     //Velocity
     
     int xVel;
     int yVel;
+    
+    //Battle related info
+    int hitPoints;
+
 };
 
 class Player : public Entity{
@@ -118,7 +140,6 @@ private:
     
 };
 
-
 class Monster : public Entity
 {
 public:
@@ -128,12 +149,8 @@ public:
 
     Monster(double x, double y);
     virtual void Activity();
-    virtual void animate(int speed, SDL_Renderer* renderer, int camX, int camY);
-    void Die();
-    bool Dead();
-private:
-    bool dead;
 };
+
 
 class PlatformWalker : public Monster
 {
