@@ -52,7 +52,7 @@ private:
     Level level;
     
     //Monster vector
-    std::vector<Entity> monsters;
+    std::vector<Monster> monsters;
     
     //Vector of menu textures
     std::vector<SDL_Texture*> menuTex;
