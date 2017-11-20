@@ -159,6 +159,7 @@ public:
 	int getBaseAttack();
 	int getBaseDefence();
 	int getMaxHealth();
+	int getExpVal();
 
 private:
 	int currentHealth;
