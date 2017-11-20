@@ -356,3 +356,8 @@ int Monster::getmaxHealth()
 {
 	return maxHealth;
 }
+
+int Monster::getExpVal()
+{
+	return expValue;
+}
