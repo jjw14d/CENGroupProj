@@ -69,8 +69,6 @@ public:
     void setPosRect(int h, int w, int x = 0, int y = 0);
     void setXPos(int x);
     void setYPos(int y);
-    void decrementHitPoints(int decrement);
-    void incrementHitPoints(int increment);
     
     /***********
      * GETTERS *
@@ -83,7 +81,6 @@ public:
     int getWidth();
     int bottom();
     int right();
-    int getHP();
     
     SDL_Texture* getTexture();
     SDL_Rect* getPos();
@@ -119,8 +116,6 @@ protected:
     int yVel;
     
     //Battle related info
-    int hitPoints;
-
 };
 
 class Player : public Entity{
@@ -130,10 +125,46 @@ public:
     //Constructor to initialize player position
     
     Player(double x, double y);
- 
+    int attack(); //return damage dealt as an int to decrement monster health
+    void getHit(int damage);	
+    bool checkLevelUp();
+    void levelUp();
+    void addExp(int expVal); //add exp after an enemy is defeated
+    //accessors
+    int getLevel();
+    int getCurrentExp();
+    int getLevelUpExp();
+    int getHealth();
+    int getBaseAttack();
+    int getBaseDefence();
+    int getMaxHealth();
+	
 private:
-    
+    int level;
+    int currentExp;
+    int levelUpExp; //experience required to level up  	    
+    int baseAttack;
+    int baseDefence;	
 };
 
+//monster subclass
+class Monster : public Entity
+{
+public:
+	Monster();
+	Monster(double x, double y, SDL_Texture* spriteTex, int playerLevel); //constructors for Monster class
+	int attack();
+	void getHit(int damage);
+	int getHealth(); //accessors
+	int getBaseAttack();
+	int getBaseDefence();
+	int getMaxHealth();
 
+private:
+	int currentHealth;
+	int maxHealth;
+	int baseAttack;
+	int baseDefence;
+	int expValue;
+};
 #endif /* Entity_h */
