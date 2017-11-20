@@ -236,3 +236,38 @@ Player::Player(double x, double y) : Entity(x,y){
 }
 
 
+
+Monster::Monster() : Entity() {}
+Monster::Monster(double x, double y) : Entity(x, y) {}
+void Monster::Activity(){ }
+
+
+PlatformWalker::PlatformWalker() : Monster(){
+    goRight();
+    switchAnimationChannel(0);
+}
+PlatformWalker::PlatformWalker(double x, double y) : Monster(x, y){
+    goRight();
+    switchAnimationChannel(0);
+}
+
+void PlatformWalker::setPlatform(int l, int r) { leftEnd = l; rightEnd = r; }
+void PlatformWalker::setPlatform(const SDL_Rect & platform){
+    leftEnd = platform.x;
+    rightEnd = platform.x + platform.w;
+}
+void PlatformWalker::Activity() {
+    if (getxPos() == leftEnd) // at left end of platform
+    {
+        goRight();
+        switchAnimationChannel(0);
+    }
+
+    if (getxPos() + getWidth() == rightEnd) // At right end of platform
+    {
+        goLeft();
+        switchAnimationChannel(1);
+    }
+    move();
+}
+

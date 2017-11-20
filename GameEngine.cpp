@@ -25,17 +25,7 @@ GameEngine::GameEngine(){
 	level.addTerrain(450, 300, 300, 20);
 	level.addTerrain(800, 400, 300, 20);
     
-    //create some monsters
-    Entity* mon1 = new Entity(50, 50);
-    mon1->setYPos(200);
-    mon1->setXPos(500);
-    Entity* mon2 = new Entity (50, 50);
-    mon2->setYPos(200);
-    mon2->setXPos(800);
-
-    monsters.push_back(*mon1);
-    monsters.push_back(*mon2);
-    delete mon1;
+   
     
     //initialize SDL video and event subsystems
     
@@ -68,6 +58,22 @@ GameEngine::GameEngine(){
     player.setSpriteSheet(loadGraphics("somersault.png"));
     player.setPosRect(100, 100);
     
+    //create some monsters
+    walkers.push_back(PlatformWalker());
+    walkers.back().setPlatform(level.getTerrain()[1]);
+    walkers.back().setPosRect(100, 100, 400, 350);
+    walkers.back().setSpriteSheet(loadGraphics("somersault.png"));
+
+    walkers.push_back(PlatformWalker());
+    walkers.back().setPlatform(level.getTerrain()[1]);
+    walkers.back().setPosRect(100, 100, 600, 350);
+    walkers.back().setSpriteSheet(loadGraphics("somersault.png"));
+
+    walkers.push_back(PlatformWalker());
+    walkers.back().setPlatform(level.getTerrain()[3]);
+    walkers.back().setSpriteSheet(loadGraphics("somersault.png"));
+    walkers.back().setPosRect(100, 100, 800, 300);
+
 	//Load background images for platform and battle segments
 	level.addTexture(loadGraphics("BG.png"));
     level.addTexture(loadGraphics("BattleBG.png"));
@@ -75,7 +81,7 @@ GameEngine::GameEngine(){
     //Load menu textures
     menuTex.push_back(loadGraphics("battleMenuMain.png"));
     menuTex.push_back(loadGraphics("inventoryMenuMain.png"));
-    
+      
     //Set the background texture to the platforming background intially.
     level.setBG(0);
     
@@ -92,6 +98,8 @@ GameEngine::~GameEngine(){
     for (int i = 0; i < menuTex.size(); i++){
         SDL_DestroyTexture(menuTex[i]);
     }
+
+    walkers.clear();
 }
 
 void GameEngine::run(){
@@ -245,8 +253,8 @@ void GameEngine::run(){
              * monster the player is in collision with.
              */
         
-            for (int i = 0; i < monsters.size(); i++){
-                if (checkCollision(*player.getPos(), *monsters[i].getPos())){
+            for (int i = 0; i < walkers.size(); i++){
+                if (checkCollision(*player.getPos(), *walkers[i].getPos())){
                     gameMode = BATTLE;
                     battleMonsterIndex = i;
                 }
@@ -299,22 +307,32 @@ void GameEngine::run(){
             }
         
             //render monsters
-            for (int i = 0; i < monsters.size(); i++){
+         
+            for (int i = 0; i < walkers.size(); i++){
+                // Animate renders relative to camera
+                walkers[i].Activity();
+                walkers[i].animate(3, renderer, camera.x, camera.y);
+
                 /* must be rendered relative to the camera, so we subtract the camera's
-                 * position.
-                 */
-                monsters[i].setXPos(monsters[i].getxPos() - camera.x);
-                monsters[i].setYPos(monsters[i].getyPos() - camera.y);
+                * position.
+                */
+            /*    
+                walkers[i].setXPos(walkers[i].getxPos() - camera.x);
+                walkers[i].setYPos(walkers[i].getyPos() - camera.y);
+            
                 SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
 
-                SDL_RenderDrawRect(renderer, monsters[i].getPos());
+                SDL_RenderDrawRect(renderer, walkers[i].getPos());
                 SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+                walkers[i].setXPos(walkers[i].getxPos() + camera.x);
+                walkers[i].setYPos(walkers[i].getyPos() + camera.y);
+           */
 
-                monsters[i].setXPos(monsters[i].getxPos() + camera.x);
-                monsters[i].setYPos(monsters[i].getyPos() + camera.y);
+               
                 
             }
-    
+         
+          
             //animate only if there was horizontal movement. Otherwise, just re-render.
             if (motion)
                 player.animate(3, renderer, camera.x, camera.y);
@@ -329,8 +347,8 @@ void GameEngine::run(){
                 player.setXPos(100);
                 player.setYPos(200);
                 
-                monsters[battleMonsterIndex].setXPos(600);
-                monsters[battleMonsterIndex].setYPos(200);
+                walkers[battleMonsterIndex].setXPos(600);
+                walkers[battleMonsterIndex].setYPos(200);
                 
                 //Place the menu cursor on the battle menu
                 menuCursor.x = 100;
@@ -377,8 +395,8 @@ void GameEngine::run(){
                             
                                 case 372:
                                     //Fight: subtract 1 from the monster's HP. Exit if == 0.
-                                    monsters[battleMonsterIndex].decrementHitPoints(1);
-                                    if (monsters[battleMonsterIndex].getHP() == 0)
+                                    walkers[battleMonsterIndex].decrementHitPoints(1);
+                                    if (walkers[battleMonsterIndex].getHP() == 0)
                                         gameMode = PLATFORM;
                                     break;
                                 case 402:
@@ -394,7 +412,7 @@ void GameEngine::run(){
 
             //update health bars
             playerHealthBar.w = 10 * player.getHP();
-            monsterHealthBar.w = 10 * monsters[battleMonsterIndex].getHP();
+            monsterHealthBar.w = 10 * walkers[battleMonsterIndex].getHP();
 
             //re-render
             SDL_RenderClear(renderer);
@@ -405,8 +423,10 @@ void GameEngine::run(){
             
             player.animate(4, renderer, staticCam.x, staticCam.y);
             
-            SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0x00);
-            SDL_RenderDrawRect(renderer, monsters[battleMonsterIndex].getPos());
+            //SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0x00);
+            //SDL_RenderDrawRect(renderer, monsters[battleMonsterIndex].getPos());
+            
+            walkers[battleMonsterIndex].animate(4, renderer, staticCam.x, staticCam.y);
             
             //draw health bars
             SDL_RenderFillRect(renderer, &playerHealthBar);
@@ -426,7 +446,7 @@ void GameEngine::run(){
                 player.loadPosition();
                 
                 //destroy the monster we were fighting
-                monsters.erase(monsters.begin() + battleMonsterIndex);
+                walkers.erase(walkers.begin() + battleMonsterIndex);
                 
                 //switch back to the platform segment's background texture.
                 level.setBG(0);
