@@ -7,7 +7,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <vector>
-
+#undef main
 /* Contains the background as well as any static foreground elements
  * that need to move independently from the camera.
  */

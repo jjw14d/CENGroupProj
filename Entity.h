@@ -3,8 +3,13 @@
 #define Entity_h
 
 #include <stdio.h>
+/*
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+*/
+#include <SDL.h>
+#include <SDL_image.h>
+
 
 /* Defines parameters for any moving objects that can interact with one another.
  * this includes monsters as well as the player character.
@@ -147,6 +152,7 @@ private:
     int baseDefence;	
 };
 
+
 //monster subclass
 class Monster : public Entity
 {
@@ -160,12 +166,34 @@ public:
 	int getBaseDefence();
 	int getMaxHealth();
 	int getExpVal();
-
-private:
+  virtual void Activity();
+  
+  private:
 	int currentHealth;
 	int maxHealth;
 	int baseAttack;
 	int baseDefence;
 	int expValue;
 };
+
+/*platformWalker subclass*/
+
+class PlatformWalker : public Monster
+{
+public:
+    PlatformWalker();
+
+    PlatformWalker(double x, double y);
+    virtual void Activity();
+    void setPlatform(int l, int r);
+    void setPlatform(const SDL_Rect &);
+private:
+    int leftEnd;
+    int rightEnd;
+};
+
+
+
+
+
 #endif /* Entity_h */

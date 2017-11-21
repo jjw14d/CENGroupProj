@@ -25,18 +25,6 @@ GameEngine::GameEngine(){
 	level.addTerrain(450, 300, 300, 20);
 	level.addTerrain(800, 400, 300, 20);
     
-    //create some monsters
-    Monster* mon1 = new Monster(); //I set the position rectangles later on when it happens with the player entity
-    //mon1->setYPos(200);
-    //mon1->setXPos(500);
-    Monster* mon2 = new Monster();
-    //mon2->setYPos(200);
-    //mon2->setXPos(800);
-
-    monsters.push_back(*mon1);
-    monsters.push_back(*mon2);
-    //delete mon1;
-	
     
     //initialize SDL video and event subsystems
     
@@ -69,27 +57,35 @@ GameEngine::GameEngine(){
     player.setSpriteSheet(loadGraphics("somersault.png"));
     player.setPosRect(100, 100);
     
+    //create some monsters
+    walkers.push_back(PlatformWalker());
+    walkers.back().setPlatform(level.getTerrain()[1]);
+    walkers.back().setPosRect(100, 100, 400, 350);
+    walkers.back().setSpriteSheet(loadGraphics("somersault_red.png"));
+
+    walkers.push_back(PlatformWalker());
+    walkers.back().setPlatform(level.getTerrain()[1]);
+    walkers.back().setPosRect(100, 100, 600, 350);
+    walkers.back().setSpriteSheet(loadGraphics("somersault_red.png"));
+
+    walkers.push_back(PlatformWalker());
+    walkers.back().setPlatform(level.getTerrain()[3]);
+    walkers.back().setSpriteSheet(loadGraphics("somersault_red.png"));
+    walkers.back().setPosRect(100, 100, 800, 300);
+
 	//Load background images for platform and battle segments
 	level.addTexture(loadGraphics("BG.png"));
     level.addTexture(loadGraphics("BattleBG.png"));
-	
-	//load enemy sprites and postition rectangles, just like with player
-	mon1->setSpriteSheet(loadGraphics("somersault_red.png")); //I just recolored the protagonist sprite for now
-	mon1->setPosRect(100, 100, 300, 200); //put on the third platform
-	mon2->setSpriteSheet(loadGraphics("somersault_red.png"));
-	mon2->setPosRect(100, 100, 700, 200); //put this guy on the last platform
     
     //Load menu textures
     menuTex.push_back(loadGraphics("battleMenuMain.png"));
     menuTex.push_back(loadGraphics("inventoryMenuMain.png"));
-    
+      
     //Set the background texture to the platforming background intially.
     level.setBG(0);
     
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, player.getTexture(), NULL,NULL);
-    SDL_RenderCopy(renderer, mon1->getTexture(), NULL, NULL);
-    SDL_RenderCopy(renderer, mon2->getTexture(), NULL, NULL); 
+    SDL_RenderCopy(renderer, player.getTexture(), NULL,NULL); 
     SDL_RenderPresent(renderer);
 }
 
@@ -101,6 +97,8 @@ GameEngine::~GameEngine(){
     for (int i = 0; i < menuTex.size(); i++){
         SDL_DestroyTexture(menuTex[i]);
     }
+
+    walkers.clear();
 }
 
 void GameEngine::run(){
@@ -114,9 +112,7 @@ void GameEngine::run(){
     int gameMode = PLATFORM;
     
     //true only if the player moves
-    bool motion;
-	bool mon1Motion;
-	bool mon2Motion; 
+    bool motion; 
     
     //Element of the monster to take into the battle segment
     int battleMonsterIndex;
@@ -138,9 +134,6 @@ void GameEngine::run(){
     SDL_RenderClear(renderer);
 
     player.animate(4, renderer, camera.x, camera.y);
-	
-	mon1->animate(4, renderer, camera.x, camera.y);
-	mon2->animate(4, renderer, camera.x, camera.y); //animate enemy sprites just like a player
 
     SDL_RenderPresent(renderer);
     
@@ -154,8 +147,6 @@ void GameEngine::run(){
         
         if (gameMode == PLATFORM){
             motion = false;
-		mon1Motion = false;
-		mon2Motion = false;
             //SDL_PollEvent(&event);
         
             while (SDL_PollEvent(&event)){
@@ -225,68 +216,6 @@ void GameEngine::run(){
         
             //apply gravity
             player.fall();
-		
-		//setting the enemy movement, using functions from entity.h. Should make him just patrol back on forth on whatever platform he spawns on
-		for (unsigned int i = 0; i < level.numWalls(); i++) //check collision, make sure the enemy is actually standing on something to patrol
-		{
-			if (isOnTop(*mon1->getPos(), level.getTerrain()[i]))
-			{
-				SDL_Rect currentPlatform = level.getTerrain()[i]; //the rectangle the enemy is currently standing on
-				if ((mon1->getxPos() + mon1->getXVel()) < currentPlatform.x) //if the enemy is about to hit the left side of the platform
-				{
-					mon1->stopX(); //stop motion
-					mon1->switchAnimationChannel(0); //face right
-					mon1->goRight();
-					mon1Motion = true;
-				}
-				else if ((mon1->getxPos() + mon1->getXVel()) > (currentPlatform.x + currentPlatform.w)) // if the enemy is about to hit the right side of the platform
-				{
-					mon1->stopX();
-					mon1->switchAnimationChannel(1); //face left
-					mon1->goLeft();
-					mon1Motion = true;
-				}
-				else if ((mon1->getxPos() > currentPlatform.x) && (mon1->getxPos() < currentPlatform.x + currentPlatform.w))
-				{
-					if (mon1->getXVel() == 0) //if in the middle of the platform and not moving (like right after it spawns)
-					{
-						mon1->goRight();
-						mon1Motion = true;
-					}
-				}
-			}
-		}
-		
-		//do the same for the second monster, but he starts going left
-		for (unsigned int i = 0; i < level.numWalls(); i++) //check collision, make sure the enemy is actually standing on something to patrol
-		{
-			if (isOnTop(*mon2->getPos(), level.getTerrain()[i]))
-			{
-				SDL_Rect currentPlatform = level.getTerrain()[i]; //the rectangle the enemy is currently standing on
-				if ((mon2->getxPos() + mon2->getXVel()) < currentPlatform.x) //if the enemy is about to hit the left side of the platform
-				{
-					mon2->stopX(); //stop motion
-					mon2->switchAnimationChannel(0); //face right
-					mon2->goRight();
-					mon2Motion = true;
-				}
-				else if ((mon2->getxPos() + mon2->getXVel()) > (currentPlatform.x + currentPlatform.w)) // if the enemy is about to hit the right side of the platform
-				{
-					mon2->stopX();
-					mon2->switchAnimationChannel(1); //face left
-					mon2->goLeft();
-					mon2Motion = true;
-				}
-				else if ((mon2->getxPos() > currentPlatform.x) && (mon2->getxPos() < currentPlatform.x + currentPlatform.w))
-				{
-					if (mon2->getXVel() == 0) //if in the middle of the platform and not moving (like right after it spawns)
-					{
-						mon2->goLeft();
-						mon2Motion = true;
-					}
-				}
-			}
-		}
 
             /* Here we update the player position (previously done
             * with the move() function) and check for collision.
@@ -315,53 +244,14 @@ void GameEngine::run(){
                     if(player.getyPos() < level.getTerrain()[i].y)
                         player.setYPos(level.getTerrain()[i].y - player.getHeight());
                 }
-		
-		//update enemy position just like a moving player
-		mon1->setXPos(mon1->getxPos() + mon1->getXVel());
-		for (int i = 0; i < level.numWalls(); i++) //if he bumps into anything, I also want to set him walking the other way
-		{
-			if (checkCollision(level.getTerrain()[i], mon1->.getPos()))
-			{
-				mon1->setXPos(mon1->getxPos() - mon1->getXVel());
-				if (mon1->getXVel() > 0) //if he's heading right
-				{
-					mon1->stopX();
-					mon1->goLeft();
-				}
-				else if (mon1->getXVel() < 0)
-				{
-					mon1->stopX();
-					mon1->goRight();
-				}
-			}
-		}
-		
-		//do the same for the second enemy
-		for (int i = 0; i < level.numWalls(); i++) //if he bumps into anything, I also want to set him walking the other way
-		{
-			if (checkCollision(level.getTerrain()[i], mon2->.getPos()))
-			{
-				mon1->setXPos(mon2->getxPos() - mon2->getXVel());
-				if (mon2->getXVel() > 0) //if he's heading right
-				{
-					mon2->stopX();
-					mon2->goLeft();
-				}
-				else if (mon2->getXVel() < 0)
-				{
-					mon2->stopX();
-					mon2->goRight();
-				}
-			}
-		}
         
             /* Check for collision between player and monster. If there is a collision,
              * set gamemode to BATTLE and set the battleMonsterIndex to the index of the
              * monster the player is in collision with.
              */
         
-            for (int i = 0; i < monsters.size(); i++){
-                if (checkCollision(*player.getPos(), *monsters[i].getPos())){
+            for (int i = 0; i < walkers.size(); i++){
+                if (checkCollision(*player.getPos(), *walkers[i].getPos())){
                     gameMode = BATTLE;
                     battleMonsterIndex = i;
                 }
@@ -412,25 +302,35 @@ void GameEngine::run(){
                 level.getTerrain()[i].y = level.getTerrain()[i].y + camera.y;
                 
             }
-        
-            //render monsters
-           // I just used entity functions to render monsters
-    
+         
+            for (int i = 0; i < walkers.size(); i++){
+                // Animate renders relative to camera
+                walkers[i].Activity();
+                walkers[i].animate(3, renderer, camera.x, camera.y);
+
+                /* must be rendered relative to the camera, so we subtract the camera's
+                * position.
+                */
+            /*    
+                walkers[i].setXPos(walkers[i].getxPos() - camera.x);
+                walkers[i].setYPos(walkers[i].getyPos() - camera.y);
+            
+                SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
+
+                SDL_RenderDrawRect(renderer, walkers[i].getPos());
+                SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+                walkers[i].setXPos(walkers[i].getxPos() + camera.x);
+                walkers[i].setYPos(walkers[i].getyPos() + camera.y);
+           */
+
+               
+                
+            }
             //animate only if there was horizontal movement. Otherwise, just re-render.
             if (motion)
                 player.animate(3, renderer, camera.x, camera.y);
             else
                 player.render(renderer, camera.x, camera.y);
-		
-		//animate monsters if in motion
-		if(mon1Motion == true)
-			mon1->animate(3, renderer, camera.x, camera.y);
-		else
-			mon1->render(renderer, camera.x, camera.y);
-		if(mon2Motion == true)
-			mon2->animate(3, renderer, camera.x, camera.y);
-		else
-			mon2->render(renderer, camera.x, camera.y);
         
             SDL_RenderPresent(renderer);
             
@@ -440,8 +340,8 @@ void GameEngine::run(){
                 player.setXPos(100);
                 player.setYPos(200);
                 
-                monsters[battleMonsterIndex].setXPos(600);
-                monsters[battleMonsterIndex].setYPos(200);
+                walkers[battleMonsterIndex].setXPos(600);
+                walkers[battleMonsterIndex].setYPos(200);
                 
                 //Place the menu cursor on the battle menu
                 menuCursor.x = 100;
@@ -460,7 +360,7 @@ void GameEngine::run(){
 		
 	//Rectangles for monster and player health bars. I just have them scale with total hitpoints right now
     	SDL_Rect playerHealthBar = {100, 100, player.getHealth(), 10};
-    	SDL_Rect monsterHealthBar = {570, 100, monsters[battleMonsterIndex].getHealth, 10};
+    	SDL_Rect monsterHealthBar = {570, 100, walkers[battleMonsterIndex].getHealth, 10};
             
             while( SDL_PollEvent( &event ) != 0 )
             {
@@ -490,21 +390,22 @@ void GameEngine::run(){
                             //determine the desired menu option based on the cursor's position
                             switch (menuCursor.y) {
                             
-				case 372:	  
-                                    monsters[battleMonsterIndex].getHit(player.attack()); //just rewrote with the new functions
-                                    if (monsters[battleMonsterIndex].getHealth() <= 0)
-				    {
-					player.addExp(monsters[battleMonsterIndex].getExpVal());
-					if(player.checkLevelUp())
-						player.levelUp(); //trigger level up automatically after experience is added
+                                case 372:
+                                    //Fight
+                                    walkers[battleMonsterIndex].getHit(player.attack());
+                                    if (walkers[battleMonsterIndex].getHP() <= 0)
+                                    {
+                                        player.addExp(walkers[battleMonsterIndex].getExpVal());
+                                        if(player.checkLevelUp())
+                                          player.levelUp();
                                         gameMode = PLATFORM;
-				    }
+                                    }
                                     break;
                                 case 402:
                                     //Run: if the user flees the battle, return to the platform segment.
                                     gameMode = PLATFORM;
-				    //if they flee, only give the player a portion of the experience
-				    player.addExp((monsters[battleMonsterIndex].getExpVal()) / 10);
+                                    //give player portion of normal experience
+                                    player.addExp((walkers[battleMonsterIndex].getExpVal()) / 10);
                                 default:
                                     break;
                             }
@@ -515,13 +416,13 @@ void GameEngine::run(){
 
             //update health bars
 	    if(player.getHealth() < 0)	
-            	playerHealthBar.w = 0; //to prevent a negative width
+          playerHealthBar.w = 0; //to prevent a negative width
 	    else
-		playerHealthBar.w = player.getHealth();     
-	    if(monsters[battleMonsterIndex].getHealth() < 0)
-            	monsterHealthBar.w = 0;
+		      playerHealthBar.w = player.getHealth();     
+	    if(walkers[battleMonsterIndex].getHealth() < 0)
+          monsterHealthBar.w = 0;
 	    else
-		monsterHealthBar.w = monsters[battleMonsterIndex].getHealth();
+		      monsterHealthBar.w = walkers[battleMonsterIndex].getHealth();
 
             //re-render
             SDL_RenderClear(renderer);
@@ -531,11 +432,8 @@ void GameEngine::run(){
             SDL_RenderCopy(renderer, menuTex[0], NULL, &staticCam);
             
             player.animate(4, renderer, staticCam.x, staticCam.y);
-		
-	    monsters[battleMonsterIndex].animate(4, renderer, staticCam.x, staticCam.y);	
-            
-            SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0x00);
-            //SDL_RenderDrawRect(renderer, monsters[battleMonsterIndex].getPos()); Shouldn't need this anymore I think?
+           
+            walkers[battleMonsterIndex].animate(4, renderer, staticCam.x, staticCam.y);
             
             //draw health bars
             SDL_RenderFillRect(renderer, &playerHealthBar);
@@ -555,7 +453,7 @@ void GameEngine::run(){
                 player.loadPosition();
                 
                 //destroy the monster we were fighting
-                monsters.erase(monsters.begin() + battleMonsterIndex);
+                walkers.erase(walkers.begin() + battleMonsterIndex);
                 
                 //switch back to the platform segment's background texture.
                 level.setBG(0);

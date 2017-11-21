@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include "GameEngine.h"
-#include <unistd.h>
 
 int main(int argc, const char * argv[]) {
     

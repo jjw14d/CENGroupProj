@@ -6,9 +6,13 @@
 #include <iostream>
 #include <vector>
 #include <string>
-
+/*
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+*/
+#include <SDL.h>
+#include <SDL_image.h>
+#undef main
 
 #include "Entity.h"
 #include "Level.h"
@@ -52,7 +56,7 @@ private:
     Level level;
     
     //Monster vector
-    std::vector<Monster> monsters;
+    std::vector<PlatformWalker> walkers;
     
     //Vector of menu textures
     std::vector<SDL_Texture*> menuTex;
