@@ -492,15 +492,19 @@ void GameEngine::run(){
                             
 				case 372:	  
                                     monsters[battleMonsterIndex].getHit(player.attack()); //just rewrote with the new functions
-                                    if (monsters[battleMonsterIndex].getHealth() == 0)
+                                    if (monsters[battleMonsterIndex].getHealth() <= 0)
 				    {
-					    
+					player.addExp(monsters[battleMonsterIndex].getExpVal());
+					if(player.checkLevelUp())
+						player.levelUp(); //trigger level up automatically after experience is added
                                         gameMode = PLATFORM;
 				    }
                                     break;
                                 case 402:
                                     //Run: if the user flees the battle, return to the platform segment.
                                     gameMode = PLATFORM;
+				    //if they flee, only give the player a portion of the experience
+				    player.addExp((monsters[battleMonsterIndex].getExpVal()) / 10);
                                 default:
                                     break;
                             }
@@ -510,8 +514,14 @@ void GameEngine::run(){
             }
 
             //update health bars
-            playerHealthBar.w = 10 * player.getHP();
-            monsterHealthBar.w = 10 * monsters[battleMonsterIndex].getHP();
+	    if(player.getHealth() < 0)	
+            	playerHealthBar.w = 0; //to prevent a negative width
+	    else
+		playerHealthBar.w = player.getHealth();     
+	    if(monsters[battleMonsterIndex].getHealth() < 0)
+            	monsterHealthBar.w = 0;
+	    else
+		monsterHealthBar.w = monsters[battleMonsterIndex].getHealth();
 
             //re-render
             SDL_RenderClear(renderer);
@@ -521,9 +531,11 @@ void GameEngine::run(){
             SDL_RenderCopy(renderer, menuTex[0], NULL, &staticCam);
             
             player.animate(4, renderer, staticCam.x, staticCam.y);
+		
+	    monsters[battleMonsterIndex].animate(4, renderer, staticCam.x, staticCam.y);	
             
             SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0x00);
-            SDL_RenderDrawRect(renderer, monsters[battleMonsterIndex].getPos());
+            //SDL_RenderDrawRect(renderer, monsters[battleMonsterIndex].getPos()); Shouldn't need this anymore I think?
             
             //draw health bars
             SDL_RenderFillRect(renderer, &playerHealthBar);
