@@ -68,7 +68,7 @@ private:
     Level level;
     
     //Monster vector
-    std::vector<Entity> monsters;
+    std::vector<Monster*> monsters;
     
     //Menu font
     TTF_Font *menuFont;

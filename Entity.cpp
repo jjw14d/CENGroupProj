@@ -56,7 +56,7 @@ void Entity::goRight(){
     xVel = 5;
 }
 
-void Entity::move(){
+void Entity::updatePos(){
     position.x += xVel;
     position.y += yVel;
 }
@@ -220,7 +220,6 @@ int Entity::getHP(){
     return hitPoints;
 }
 
-
 /*
  **********
  PLAYER ***
@@ -232,6 +231,62 @@ Player::Player() : Entity(){
 }
 
 Player::Player(double x, double y) : Entity(x,y){
+    
+}
+
+/*
+ ***********
+ MONSTER ***
+ ***********
+ */
+
+Monster::Monster() : Entity(){
+    
+}
+
+Monster::Monster(double x, double y) : Entity(x,y){
+    
+}
+
+Monster::~Monster(){
+    
+}
+
+/*
+ ***********
+ FLOATER ***
+ ***********
+ */
+
+Floater::Floater() : Monster(){
+    anchor.first = 0;
+    anchor.second = 0;
+    xVel = 1;
+}
+
+Floater::Floater(double x, double y) : Monster(x,y){
+    anchor.first = x;
+    anchor.second = y;
+    xVel = 10;
+}
+
+Floater::~Floater(){
+    
+}
+
+void Floater::move(){
+    //check distance from the anchor
+    xVel -= (position.x - anchor.first)/100;
+}
+
+void Floater::setXPos(int x){
+    Entity::setXPos(x);
+    anchor.first = x;
+}
+
+void Floater::setYPos(int y){
+    Entity::setYPos(y);
+    anchor.second = y;
     
 }
 

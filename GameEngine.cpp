@@ -25,16 +25,15 @@ GameEngine::GameEngine(){
 	level.addTerrain(800, 400, 300, 20);
     
     //create some monsters
-    Entity* mon1 = new Entity(50, 50);
+    Floater* mon1 = new Floater(50, 50);
     mon1->setYPos(200);
     mon1->setXPos(500);
-    Entity* mon2 = new Entity (50, 50);
+    Floater* mon2 = new Floater(50, 50);
     mon2->setYPos(200);
     mon2->setXPos(800);
 
-    monsters.push_back(*mon1);
-    monsters.push_back(*mon2);
-    delete mon1;
+    monsters.push_back(mon1);
+    monsters.push_back(mon2);
     
     //initialize SDL video and event subsystems
 
@@ -108,6 +107,10 @@ GameEngine::~GameEngine(){
     
     for (int i = 0; i < menuTex.size(); i++){
         SDL_DestroyTexture(menuTex[i]);
+    }
+    
+    for (int i = 0; i < monsters.size(); i++){
+        delete monsters[i];
     }
     TTF_Quit();
     IMG_Quit();
@@ -233,7 +236,7 @@ void GameEngine::run(){
             player.fall();
 
             /* Here we update the player position (previously done
-            * with the move() function) and check for collision.
+            * with the updatePos() function) and check for collision.
             * Upon collision, the players position is reverted
             * back to prohibit further movement in the x or y
             * directions.
@@ -266,7 +269,7 @@ void GameEngine::run(){
              */
         
             for (int i = 0; i < monsters.size(); i++){
-                if (checkCollision(*player.getPos(), *monsters[i].getPos())){
+                if (checkCollision(*player.getPos(), *monsters[i]->getPos())){
                     gameMode = BATTLE;
                     battleMonsterIndex = i;
                 }
@@ -317,22 +320,27 @@ void GameEngine::run(){
                 level.getTerrain()[i].y = level.getTerrain()[i].y + camera.y;
                 
             }
-        
-            //render monsters
+    
+            
+            //move and render monsters
             for (int i = 0; i < monsters.size(); i++){
+                
+                monsters[i]->move();
+                monsters[i]->updatePos();
+                
+                SDL_Rect monsterRelativePos (*monsters[i]->getPos());
+                
                 /* must be rendered relative to the camera, so we subtract the camera's
                  * position.
                  */
-                monsters[i].setXPos(monsters[i].getxPos() - camera.x);
-                monsters[i].setYPos(monsters[i].getyPos() - camera.y);
+                
+                monsterRelativePos.x -= camera.x;
+                monsterRelativePos.y -= camera.y;
                 SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
 
-                SDL_RenderDrawRect(renderer, monsters[i].getPos());
+                SDL_RenderDrawRect(renderer, &monsterRelativePos);
                 SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-                monsters[i].setXPos(monsters[i].getxPos() + camera.x);
-                monsters[i].setYPos(monsters[i].getyPos() + camera.y);
-                
             }
     
             //animate only if there was horizontal movement. Otherwise, just re-render.
@@ -351,8 +359,8 @@ void GameEngine::run(){
                 player.setXPos(100);
                 player.setYPos(200);
                 
-                monsters[battleMonsterIndex].setXPos(600);
-                monsters[battleMonsterIndex].setYPos(200);
+                monsters[battleMonsterIndex]->setXPos(600);
+                monsters[battleMonsterIndex]->setYPos(200);
                 
                 //Place the menu cursor on the battle menu
                 menuCursor.x = 100;
@@ -399,8 +407,8 @@ void GameEngine::run(){
                             
                                 case 372:
                                     //Fight: subtract 1 from the monster's HP. Exit if == 0.
-                                    monsters[battleMonsterIndex].decrementHitPoints(1);
-                                    if (monsters[battleMonsterIndex].getHP() == 0)
+                                    monsters[battleMonsterIndex]->decrementHitPoints(1);
+                                    if (monsters[battleMonsterIndex]->getHP() == 0)
                                         gameMode = PLATFORM;
                                     break;
                                 case 402:
@@ -416,7 +424,7 @@ void GameEngine::run(){
 
             //update health bars
             playerHealthBar.w = 10 * player.getHP();
-            monsterHealthBar.w = 10 * monsters[battleMonsterIndex].getHP();
+            monsterHealthBar.w = 10 * monsters[battleMonsterIndex]->getHP();
 
             //re-render
             SDL_RenderClear(renderer);
@@ -428,7 +436,7 @@ void GameEngine::run(){
             player.animate(4, renderer, staticCam.x, staticCam.y);
             
             SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0x00);
-            SDL_RenderDrawRect(renderer, monsters[battleMonsterIndex].getPos());
+            SDL_RenderDrawRect(renderer, monsters[battleMonsterIndex]->getPos());
             
             //draw health bars
             SDL_RenderFillRect(renderer, &playerHealthBar);

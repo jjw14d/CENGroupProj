@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-
+#include <tuple>
+#include <iostream>
 /* Defines parameters for any moving objects that can interact with one another.
  * this includes monsters as well as the player character.
  */
@@ -24,7 +25,7 @@ public:
     
     void goLeft();
     void goRight();
-    void move();
+    void updatePos();
     void jump();
     void stopX();
     void stopY();
@@ -100,7 +101,7 @@ protected:
     
     /* animationFrame refers to a cropped area of the spritesheet from which to render.
      * usually, it encompasses a single frame of animation, and is moved to advance the
-     * frame in the advance() fucntion.
+     * frame in the advance() function.
      */
     
     SDL_Rect animationFrame;
@@ -132,6 +133,41 @@ public:
     Player(double x, double y);
  
 private:
+    
+};
+
+class Monster : public Entity{
+public:
+    Monster();
+    Monster(double x, double y);
+    virtual ~Monster();
+    // Updates the monster's velocity according to its behavior.
+    
+    virtual void move() = 0;
+    
+private:
+
+};
+
+class Floater : public Monster{
+public:
+    Floater();
+    Floater(double x, double y);
+    ~Floater();
+    
+    //The floater will move horizontally back and forth, centered over the position represented
+    //by anchor.
+    void move();
+    
+    
+    //Updates anchor point
+    void setXPos(int x);
+    void setYPos(int y);
+    
+private:
+    
+    //An X,Y coordinate pair representing the anchor position for the floater's movement.
+    std::pair<int,int> anchor;
     
 };
 
