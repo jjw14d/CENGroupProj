@@ -14,7 +14,6 @@ enum gameMode {PLATFORM, BATTLE, INVENTORY};
 GameEngine::GameEngine(){
     
     //Initialize member data
-    
     running = true;
 	//winW = 800;
 	//winH = 1100;
@@ -38,7 +37,7 @@ GameEngine::GameEngine(){
     delete mon1;
     
     //initialize SDL video and event subsystems
-    
+
     SDL_Init(SDL_INIT_VIDEO);
     
     //initialize window with specified name and settings
@@ -65,6 +64,18 @@ GameEngine::GameEngine(){
         }
     }
     
+    
+    //Initialize SDL_ttf and load font
+    init_TTF();
+    
+    Menu m(loadGraphics("inventoryMenuMain.png"), SCREEN_HEIGHT, SCREEN_WIDTH, 0, 0);
+    //Add some menus
+    menus.push_back(m);
+
+    //Load font from file
+    menus[0].setFont("PrStart.ttf", 6);
+    
+    
     player.setSpriteSheet(loadGraphics("somersault.png"));
     player.setPosRect(100, 100);
     
@@ -89,9 +100,18 @@ GameEngine::~GameEngine(){
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
     
+    /* Menu destructors must run before TTF_Quit() is called.
+     * This is because we need TTF in order to clean up
+     * TTF_Font objects.
+     */
+    menus.clear();
+    
     for (int i = 0; i < menuTex.size(); i++){
         SDL_DestroyTexture(menuTex[i]);
     }
+    TTF_Quit();
+    IMG_Quit();
+    SDL_Quit();
 }
 
 void GameEngine::run(){
@@ -321,6 +341,8 @@ void GameEngine::run(){
             else
                 player.render(renderer, camera.x, camera.y);
         
+            menus[0].draw(renderer);
+            
             SDL_RenderPresent(renderer);
             
             //Prepare to enter battle mode
@@ -465,8 +487,8 @@ void GameEngine::run(){
             //re-render
             SDL_RenderCopy(renderer, menuTex[1], NULL, &staticCam);
             
+            //present
             SDL_RenderPresent(renderer);
-            
         }
     }
 }
@@ -513,6 +535,16 @@ bool GameEngine::isOnTop(SDL_Rect box1, SDL_Rect surface){
         return false;
 }
 
+void GameEngine::init_TTF(){
+    //Initialize SDL_ttf
+    
+    if( TTF_Init() == -1 )
+    {
+        std::cout << "SDL_ttf failed to initialize:" << TTF_GetError() << "\n";
+        return;
+    }
+}
+
 //Loads image at the specified path and returns it as an SDL_Texture object
 SDL_Texture* GameEngine::loadGraphics(std::string path){
     
@@ -549,4 +581,20 @@ SDL_Texture* GameEngine::loadGraphics(std::string path){
         SDL_FreeSurface(newSurface);
     }
     return newTexture;
+}
+
+SDL_Texture* GameEngine::renderString(const char* string){
+    //The texture to return
+    SDL_Texture* stringTexture = nullptr;
+    
+    SDL_Color fontColor = {255, 0, 0};
+   
+    stringTexture = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Solid(menuFont, string, fontColor));
+    
+    if (stringTexture == nullptr){
+        std::cout << "Failed to render text.\n";
+        return nullptr;
+    }
+    
+    return stringTexture;
 }
