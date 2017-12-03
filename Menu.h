@@ -13,6 +13,16 @@ class Menu{
      */
     
 public:
+    //Values representing menu options
+    enum pauseCommand {PAUSE_RESUME, PAUSE_ITEM, PAUSE_QUIT};
+    enum battleCommand {BATTLE_FIGHT, BATTLE_ITEM, BATTLE_RUN};
+    
+    struct menuOption{
+        menuOption(SDL_Texture* t, unsigned int l){ text = t; length = l; }
+        SDL_Texture* text;
+        unsigned int length;
+    };
+    
     //Default constructor
     Menu();
     
@@ -23,12 +33,20 @@ public:
     
     //Draw the menu to the screen.
     void draw(SDL_Renderer* renderer);
+    void drawBorder(SDL_Renderer* renderer);
     
     //Set the menu's font
     void setFont(const char* path, int fontSize);
     
     //Add an option to the menu
     void addOption(SDL_Renderer* renderer, const char* string);
+    
+    //move the menu's cursor
+    void cursorIncrement();
+    void cursorDecrement();
+    
+    //Getters
+    int getCursorPos();
     
 private:
     //Representation of the menu's area on the screen.
@@ -46,7 +64,10 @@ private:
     /* Vector of menu options. These are textures created from strings using
      * the ttf utility.
      */
-    std::vector<SDL_Texture*> menuOptions;
+    std::vector<menuOption> menuOptions;
+    
+    //Index for the menu's cursor
+    int cursorPos;
     
     /********************
      * HELPER FUNCTIONS *

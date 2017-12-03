@@ -74,12 +74,8 @@ private:
     TTF_Font *menuFont;
     
     //Vector of in-game menus
-    std::vector<Menu> menus;
-    
-    //Vector of menu textures
-    std::vector<SDL_Texture*> menuTex;
-    //Vector of text textures to place inside the menus
-    std::vector<SDL_Texture*> menuOptions;
+    std::vector<Menu*> menus;
+ 
     
     //window dimensions
     //int winW;

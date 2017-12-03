@@ -13,6 +13,7 @@
 class Entity{
     
 public:
+
     Entity();
     
     //Constructor to initalize entity dimensions and spriteSheet
@@ -141,6 +142,7 @@ public:
     Monster();
     Monster(double x, double y);
     virtual ~Monster();
+    
     // Updates the monster's velocity according to its behavior.
     
     virtual void move() = 0;
@@ -155,8 +157,7 @@ public:
     Floater(double x, double y);
     ~Floater();
     
-    //The floater will move horizontally back and forth, centered over the position represented
-    //by anchor.
+    //Update velocity based on the difference between the Floater's position and its anchor.
     void move();
     
     

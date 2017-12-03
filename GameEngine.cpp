@@ -63,17 +63,30 @@ GameEngine::GameEngine(){
         }
     }
     
-    
     //Initialize SDL_ttf and load font
     init_TTF();
     
-    Menu m(loadGraphics("inventoryMenuMain.png"), SCREEN_HEIGHT, SCREEN_WIDTH, 0, 0);
-    //Add some menus
-    menus.push_back(m);
+    //Initialize menus with texture and dimensions
+    Menu* menuInventory = new Menu(loadGraphics("inventoryMenuMain.png"), 100, 150, 300, 170);
+    Menu* battleMenu = new Menu(loadGraphics("inventoryMenuMain.png"), 100, 150, 100, 350);
+    
+    //Add inventory and battle menus
+    menus.push_back(menuInventory);
+    menus.push_back(battleMenu);
 
     //Load font from file
-    menus[0].setFont("PrStart.ttf", 6);
+    menus[0]->setFont("PrStart.ttf", 20);
+    menus[1]->setFont("PrStart.ttf", 20);
     
+    //Inventory menu options
+    menus[0]->addOption(renderer, "RESUME");
+    menus[0]->addOption(renderer, "ITEM");
+    menus[0]->addOption(renderer, "QUIT");
+    
+    //Battle menu options
+    menus[1]->addOption(renderer, "FIGHT");
+    menus[1]->addOption(renderer, "ITEM");
+    menus[1]->addOption(renderer, "RUN");
     
     player.setSpriteSheet(loadGraphics("somersault.png"));
     player.setPosRect(100, 100);
@@ -82,9 +95,6 @@ GameEngine::GameEngine(){
 	level.addTexture(loadGraphics("BG.png"));
     level.addTexture(loadGraphics("BattleBG.png"));
     
-    //Load menu textures
-    menuTex.push_back(loadGraphics("battleMenuMain.png"));
-    menuTex.push_back(loadGraphics("inventoryMenuMain.png"));
     
     //Set the background texture to the platforming background intially.
     level.setBG(0);
@@ -105,12 +115,12 @@ GameEngine::~GameEngine(){
      */
     menus.clear();
     
-    for (int i = 0; i < menuTex.size(); i++){
-        SDL_DestroyTexture(menuTex[i]);
-    }
-    
     for (int i = 0; i < monsters.size(); i++){
         delete monsters[i];
+    }
+    
+    for (int i = 0; i < menus.size(); i++){
+        delete menus[i];
     }
     TTF_Quit();
     IMG_Quit();
@@ -198,9 +208,9 @@ void GameEngine::run(){
                 }
             }
         
-            /* Here we handle keyboard input. First, we initialize an array containing the current state
-             * of every key on the keyboard. Then, we check the states of they keys we care
-             * about and take action accordingly.
+            /* Here we handle keyboard input. First, we initialize an array containing the
+             * current state of every key on the keyboard. Then, we check the states of
+             * they keys we care about and take action accordingly.
              */
         
             const Uint8* keyStates = SDL_GetKeyboardState( NULL );
@@ -349,7 +359,6 @@ void GameEngine::run(){
             else
                 player.render(renderer, camera.x, camera.y);
         
-            menus[0].draw(renderer);
             
             SDL_RenderPresent(renderer);
             
@@ -391,27 +400,23 @@ void GameEngine::run(){
                     switch( event.key.keysym.sym )
                     {
                         case SDLK_UP:
-                            menuCursor.y -= 15;
-                            if (menuCursor.y < 372)
-                                menuCursor.y = 402;
+                            menus[1]->cursorDecrement();
                             break;
                             
                         case SDLK_DOWN:
-                            menuCursor.y += 15;
-                            if (menuCursor.y > 402)
-                                menuCursor.y = 372;
+                            menus[1]->cursorIncrement();
                             break;
                         case SDLK_RETURN:
                             //determine the desired menu option based on the cursor's position
-                            switch (menuCursor.y) {
+                            switch (menus[1]->getCursorPos()) {
                             
-                                case 372:
+                                case Menu::BATTLE_FIGHT:
                                     //Fight: subtract 1 from the monster's HP. Exit if == 0.
                                     monsters[battleMonsterIndex]->decrementHitPoints(1);
                                     if (monsters[battleMonsterIndex]->getHP() == 0)
                                         gameMode = PLATFORM;
                                     break;
-                                case 402:
+                                case Menu::BATTLE_RUN:
                                     //Run: if the user flees the battle, return to the platform segment.
                                     gameMode = PLATFORM;
                                 default:
@@ -431,7 +436,8 @@ void GameEngine::run(){
             
             level.renderBG(0, 0, &staticCam, renderer);
             
-            SDL_RenderCopy(renderer, menuTex[0], NULL, &staticCam);
+            menus[1]->draw(renderer);
+            //SDL_RenderCopy(renderer, menuTex[0], NULL, &staticCam);
             
             player.animate(4, renderer, staticCam.x, staticCam.y);
             
@@ -442,10 +448,11 @@ void GameEngine::run(){
             SDL_RenderFillRect(renderer, &playerHealthBar);
             SDL_RenderFillRect(renderer, &monsterHealthBar);
             
+            /*
             //draw the cursor
             SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0x00);
             SDL_RenderDrawRect(renderer, &menuCursor);
-            
+            */
             
 
             SDL_RenderPresent(renderer);
@@ -467,6 +474,9 @@ void GameEngine::run(){
          * INVENTORY SEGMENT *
          *********************/
         else if (gameMode == INVENTORY){
+            //Initial Menu Draw
+            menus[0]->draw(renderer);
+            
             while( SDL_PollEvent( &event ) != 0 )
             {
                 //Check whether the user is trying to quit.
@@ -480,20 +490,27 @@ void GameEngine::run(){
                     switch( event.key.keysym.sym )
                     {
                         case SDLK_UP:
+                            menus[0]->cursorDecrement();
                             break;
                         case SDLK_DOWN:
+                            menus[0]->cursorIncrement();
                             break;
                         case SDLK_RETURN:
-                            gameMode = PLATFORM;
+                            switch (menus[0]->getCursorPos()) {
+                                case Menu::PAUSE_RESUME:
+                                    gameMode = PLATFORM;
+                                    break;
+                                case Menu::PAUSE_QUIT:
+                                    running = false;
+                                default:
+                                    break;
+                            }
                             break;
                         default:
                             break;
                     }
                 }
             }
-            
-            //re-render
-            SDL_RenderCopy(renderer, menuTex[1], NULL, &staticCam);
             
             //present
             SDL_RenderPresent(renderer);
@@ -519,7 +536,6 @@ bool GameEngine::checkCollision(SDL_Rect box1, SDL_Rect box2){
     bottomB = box2.y + box2.h;
     leftB = box2.x;
     rightB = box2.x + box2.w;
-    
     
     if (leftA >= rightB || leftB >= rightA){
         return false;
