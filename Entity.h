@@ -39,10 +39,10 @@ public:
     /* Animate the sprite. Will advance the sprite only if animationProgress % speed == 0.
      * In other words, the lower the speed, the faster the animation, with 1 being the fastest.
      * If it updates the frame, the function will call SDL_renderCopy with the
-     * provided renderer.
+     * provided renderer. Returns 1 if the animation loops back to frame 1, 0 otherwise.
      */
     
-    void animate(int speed, SDL_Renderer* renderer, int camX, int camY);
+    int animate(int speed, SDL_Renderer* renderer, int camX, int camY);
     
     //Re-render the player without animation
     
@@ -52,9 +52,11 @@ public:
     
     void switchAnimationChannel(int channel);
     
-    //Advance the frame of the current animation channel by one
-    
-    void advance();
+    /* Advance the frame of the current animation channel by one.
+     *  returns 1 if the loop is reset, and 0 otherwise.
+     */
+     
+    int advance();
     
     //Save the Entity's current position to the "savedPosition" member.
     

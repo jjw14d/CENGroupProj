@@ -2,15 +2,6 @@
 
 #include "GameEngine.h"
 
-//globals for screen and level size
-const int LEVEL_WIDTH = 1080;
-const int LEVEL_HEIGHT = 480;
-
-const int SCREEN_WIDTH = 720;
-const int SCREEN_HEIGHT = 480;
-
-
-
 GameEngine::GameEngine(){
     
     //Initialize member data
@@ -24,16 +15,7 @@ GameEngine::GameEngine(){
 	level.addTerrain(450, 300, 300, 20);
 	level.addTerrain(800, 400, 300, 20);
     
-    //create some monsters
-    Floater* mon1 = new Floater(50, 50);
-    mon1->setYPos(200);
-    mon1->setXPos(500);
-    Floater* mon2 = new Floater(50, 50);
-    mon2->setYPos(200);
-    mon2->setXPos(800);
-
-    monsters.push_back(mon1);
-    monsters.push_back(mon2);
+    
     
     //initialize SDL video and event subsystems
 
@@ -89,7 +71,25 @@ GameEngine::GameEngine(){
     menus[1]->addOption(renderer, "RUN");
     
     player.setSpriteSheet(loadGraphics("somersault.png"));
+    
+    /* For now, we just hard code the entity's hitbox size to equal
+     * the dimensions of an animation frame.
+     */
     player.setPosRect(100, 100);
+    
+    //create some monsters
+    Floater* mon1 = new Floater(50, 50);
+    mon1->setYPos(200);
+    mon1->setXPos(500);
+    Floater* mon2 = new Floater(50, 50);
+    mon2->setYPos(200);
+    mon2->setXPos(800);
+    
+    mon1->setSpriteSheet(loadGraphics("Floater.png"));
+    mon2->setSpriteSheet(loadGraphics("Floater.png"));
+    
+    monsters.push_back(mon1);
+    monsters.push_back(mon2);
     
 	//Load background images for platform and battle segments
 	level.addTexture(loadGraphics("BG.png"));
@@ -143,7 +143,8 @@ void GameEngine::run(){
     //Element of the monster to take into the battle segment
     int battleMonsterIndex;
     
-    int
+    //Turn indicator. Used only in battlemode.
+    int turn = PLAYERTURN;
     
     //Camera frame used to scroll across the level.
 	SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
@@ -280,6 +281,10 @@ void GameEngine::run(){
             for (int i = 0; i < monsters.size(); i++){
                 if (checkCollision(*player.getPos(), *monsters[i]->getPos())){
                     gameMode = BATTLE;
+                    
+                    //Player always goes first
+                    turn = PLAYERTURN;
+                    
                     battleMonsterIndex = i;
                 }
             }
@@ -347,7 +352,9 @@ void GameEngine::run(){
                 monsterRelativePos.y -= camera.y;
                 SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
 
-                SDL_RenderDrawRect(renderer, &monsterRelativePos);
+                monsters[i]->animate(4, renderer, camera.x, camera.y);
+                
+               // SDL_RenderDrawRect(renderer, &monsterRelativePos);
                 SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
             }
@@ -369,10 +376,7 @@ void GameEngine::run(){
                 
                 monsters[battleMonsterIndex]->setXPos(600);
                 monsters[battleMonsterIndex]->setYPos(200);
-                
-                //Place the menu cursor on the battle menu
-                menuCursor.x = 100;
-                menuCursor.y = 372;
+            
                 
                 //switch active background texture to the battle background
                 level.setBG(1);
@@ -385,50 +389,63 @@ void GameEngine::run(){
          ******************/
         else if (gameMode == BATTLE){
             
-            while( SDL_PollEvent( &event ) != 0 )
-            {
-                //Check whether the user is trying to quit.
-                if( event.type == SDL_QUIT )
+            if (turn == PLAYERTURN){
+                while( SDL_PollEvent( &event ) != 0 )
                 {
-                    running = false;
-                }
-                
-                
-                else if( event.type == SDL_KEYDOWN )
-                {
-                    switch( event.key.keysym.sym )
+                    //Check whether the user is trying to quit.
+                    if( event.type == SDL_QUIT )
                     {
-                        case SDLK_UP:
-                            //Decrement the menu's cursor index
-                            menus[1]->cursorDecrement();
-                            break;
-                            
-                        case SDLK_DOWN:
-                            //Increment the menu's cursor index
-                            menus[1]->cursorIncrement();
-                            break;
-                            
-                        case SDLK_RETURN:
-                            //determine the desired menu option based on the cursor's position
-                            switch (menus[1]->getCursorPos()) {
-                            
-                                case Menu::BATTLE_FIGHT:
-                                    //Fight: subtract 1 from the monster's HP. Exit if == 0.
-                                    monsters[battleMonsterIndex]->decrementHitPoints(1);
-                                    if (monsters[battleMonsterIndex]->getHP() == 0)
+                        running = false;
+                    }
+                    
+                    
+                    else if( event.type == SDL_KEYDOWN )
+                    {
+                        switch( event.key.keysym.sym )
+                        {
+                            case SDLK_UP:
+                                //Decrement the menu's cursor index
+                                menus[1]->cursorDecrement();
+                                break;
+                                
+                            case SDLK_DOWN:
+                                //Increment the menu's cursor index
+                                menus[1]->cursorIncrement();
+                                break;
+                                
+                            case SDLK_RETURN:
+                                //determine the desired menu option based on the cursor's position
+                                switch (menus[1]->getCursorPos()) {
+                                
+                                    case Menu::BATTLE_FIGHT:
+                                        //Fight: subtract 1 from the monster's HP. Exit if == 0.
+                                        monsters[battleMonsterIndex]->decrementHitPoints(4);
+                                        turn = ENEMYTURN;
+                                        if (monsters[battleMonsterIndex]->getHP() == 0)
+                                            gameMode = PLATFORM;
+                                        break;
+                                    case Menu::BATTLE_RUN:
+                                        //Run: if the user flees the battle, return to the platform segment.
                                         gameMode = PLATFORM;
-                                    break;
-                                case Menu::BATTLE_RUN:
-                                    //Run: if the user flees the battle, return to the platform segment.
-                                    gameMode = PLATFORM;
-                                default:
-                                    break;
-                            }
-                            break;
+                                    default:
+                                        break;
+                                }
+                                break;
+                        }
                     }
                 }
             }
-
+            else if (turn == ENEMYTURN){
+                
+                /* When the monster's attack animation finishes, deal damage and
+                 * let the player take their turn.
+                 */
+                if (monsters[battleMonsterIndex]->animate(4, renderer, staticCam.x, staticCam.y) == 1){
+                    player.decrementHitPoints(1);
+                    turn = PLAYERTURN;
+                }
+            }
+            
             //update health bars
             playerHealthBar.w = 10 * player.getHP();
             monsterHealthBar.w = 10 * monsters[battleMonsterIndex]->getHP();
@@ -443,8 +460,10 @@ void GameEngine::run(){
             
             player.animate(4, renderer, staticCam.x, staticCam.y);
             
+            monsters[battleMonsterIndex]->render(renderer, staticCam.x, staticCam.y);
+            
             SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0x00);
-            SDL_RenderDrawRect(renderer, monsters[battleMonsterIndex]->getPos());
+            
             
             //Draw health bars
             SDL_RenderFillRect(renderer, &playerHealthBar);
@@ -555,8 +574,8 @@ bool GameEngine::isOnTop(SDL_Rect box1, SDL_Rect surface){
 }
 
 void GameEngine::init_TTF(){
-    //Initialize SDL_ttf
     
+    //Initialize SDL_ttf
     if( TTF_Init() == -1 )
     {
         std::cout << "SDL_ttf failed to initialize:" << TTF_GetError() << "\n";
@@ -575,7 +594,7 @@ SDL_Texture* GameEngine::loadGraphics(std::string path){
     
     SDL_Surface* newSurface = IMG_Load(path.c_str());
     
-    //make sure the image loaded properly
+    //Make sure the image loaded properly
     
     if (newSurface == NULL)
         std::cout << "SDL_image error: The image at " << path << " could not be loaded\n";

@@ -22,8 +22,18 @@
 
 class GameEngine{
 public:
-    //Flag for the current game segment
+    //Constants for screen and level size
+    const int LEVEL_WIDTH = 1080;
+    const int LEVEL_HEIGHT = 480;
+    
+    const int SCREEN_WIDTH = 720;
+    const int SCREEN_HEIGHT = 480;
+    
+    //Flags for the current game segment
     enum gameMode {PLATFORM, BATTLE, INVENTORY};
+    
+    //Flags to indicate whose turn it is during the battle segment
+    enum turn {PLAYERTURN, ENEMYTURN};
     
     GameEngine();
     ~GameEngine();

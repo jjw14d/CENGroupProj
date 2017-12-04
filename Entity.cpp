@@ -81,17 +81,19 @@ void Entity::fall(){
 
 //Animation
 
-void Entity::animate(int speed, SDL_Renderer* renderer, int camX, int camY){
+int Entity::animate(int speed, SDL_Renderer* renderer, int camX, int camY){
     
-	
+    int result = 0;
     animationProgress++;
 	
     if (animationProgress % speed == 0){
-        advance();
+        result = advance();
     }
 	//player is rendered in renderSpace, relative to camera by subtracting offset
 	SDL_Rect renderSpace = { position.x - camX, position.y - camY, animationFrame.w, animationFrame.h };
     SDL_RenderCopy(renderer, spriteSheet, &animationFrame, &renderSpace);
+    
+    return result;
 
 }
 
@@ -116,7 +118,7 @@ void Entity::render(SDL_Renderer* renderer, int camX, int camY){
     SDL_RenderCopy(renderer, spriteSheet, &animationFrame, &renderSpace);
 }
 
-void Entity::advance(){
+int Entity::advance(){
     
     animationFrame.x += animationFrame.w;
     
@@ -124,8 +126,11 @@ void Entity::advance(){
     SDL_QueryTexture(spriteSheet, NULL, NULL, &spriteSheetWidth, NULL);
     
     //Loop back to frame one when we reach the edge of the spritesheet
-    if (animationFrame.x >= spriteSheetWidth)
+    if (animationFrame.x >= spriteSheetWidth){
         animationFrame.x = 0;
+        return 1;
+    }
+    return 0;
 }
 
 void Entity::savePosition(){
