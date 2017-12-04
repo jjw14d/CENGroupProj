@@ -9,7 +9,7 @@ const int LEVEL_HEIGHT = 480;
 const int SCREEN_WIDTH = 720;
 const int SCREEN_HEIGHT = 480;
 
-enum gameMode {PLATFORM, BATTLE, INVENTORY};
+
 
 GameEngine::GameEngine(){
     
@@ -66,7 +66,7 @@ GameEngine::GameEngine(){
     //Initialize SDL_ttf and load font
     init_TTF();
     
-    //Initialize menus with texture and dimensions
+    //Initialize menus with texture, position, and dimensions
     Menu* menuInventory = new Menu(loadGraphics("inventoryMenuMain.png"), 100, 150, 300, 170);
     Menu* battleMenu = new Menu(loadGraphics("inventoryMenuMain.png"), 100, 150, 100, 350);
     
@@ -130,7 +130,7 @@ GameEngine::~GameEngine(){
 void GameEngine::run(){
     
     /* The SDL_Event object will be used only to poll for
-     * a quit event, and to handle player jumping . Keyboard input will be handled
+     * a quit event, and to handle player jumping. Keyboard input will be handled
      * later.
      */
     
@@ -143,8 +143,7 @@ void GameEngine::run(){
     //Element of the monster to take into the battle segment
     int battleMonsterIndex;
     
-    //Small rectangle to use as a menu cursor.
-    SDL_Rect menuCursor = { 0, 0, 10, 10 };
+    int
     
     //Camera frame used to scroll across the level.
 	SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
@@ -394,18 +393,21 @@ void GameEngine::run(){
                     running = false;
                 }
                 
+                
                 else if( event.type == SDL_KEYDOWN )
                 {
-                    
                     switch( event.key.keysym.sym )
                     {
                         case SDLK_UP:
+                            //Decrement the menu's cursor index
                             menus[1]->cursorDecrement();
                             break;
                             
                         case SDLK_DOWN:
+                            //Increment the menu's cursor index
                             menus[1]->cursorIncrement();
                             break;
+                            
                         case SDLK_RETURN:
                             //determine the desired menu option based on the cursor's position
                             switch (menus[1]->getCursorPos()) {
@@ -436,25 +438,18 @@ void GameEngine::run(){
             
             level.renderBG(0, 0, &staticCam, renderer);
             
+            //Draw the menu with the cursor at its current index
             menus[1]->draw(renderer);
-            //SDL_RenderCopy(renderer, menuTex[0], NULL, &staticCam);
             
             player.animate(4, renderer, staticCam.x, staticCam.y);
             
             SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0x00);
             SDL_RenderDrawRect(renderer, monsters[battleMonsterIndex]->getPos());
             
-            //draw health bars
+            //Draw health bars
             SDL_RenderFillRect(renderer, &playerHealthBar);
             SDL_RenderFillRect(renderer, &monsterHealthBar);
             
-            /*
-            //draw the cursor
-            SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0x00);
-            SDL_RenderDrawRect(renderer, &menuCursor);
-            */
-            
-
             SDL_RenderPresent(renderer);
             
             //Prepare to return to platform mode.

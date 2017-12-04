@@ -22,6 +22,9 @@
 
 class GameEngine{
 public:
+    //Flag for the current game segment
+    enum gameMode {PLATFORM, BATTLE, INVENTORY};
+    
     GameEngine();
     ~GameEngine();
     
