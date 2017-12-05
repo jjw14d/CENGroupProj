@@ -300,6 +300,10 @@ bool GameEngine::run(){
 			//Currently set to the LEVEL_WIDTH (x position of 1080)
 			if (player.getxPos() >= 1080)
 				gameMode = LEVEL_END;
+
+			//Indicates player fell off platform and resets level
+			if (player.getyPos() > LEVEL_HEIGHT)
+				return true;
         
             //center camera over the player
             camera.x = (player.getxPos() + player.getWidth() / 2) - SCREEN_WIDTH / 2;
