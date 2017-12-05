@@ -4,8 +4,8 @@
 #define Level_h
 
 #include <stdio.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 #include <vector>
 
 /* Contains the background as well as any static foreground elements

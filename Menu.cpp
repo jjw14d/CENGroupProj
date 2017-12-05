@@ -58,6 +58,13 @@ void Menu::setFont(const char* path, int fontSize){
     
 }
 
+//Set font color
+void Menu::setColor(int r, int g, int b) {
+	fontColor.r = r;
+	fontColor.g = g;
+	fontColor.b = b;
+}
+
 void Menu::draw(SDL_Renderer* renderer){
     
     //Save old draw color
