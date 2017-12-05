@@ -51,16 +51,19 @@ GameEngine::GameEngine(){
     Menu* menuInventory = new Menu(loadGraphics("inventoryMenuMain.png"), 100, 150, 300, 170);
     Menu* battleMenu = new Menu(loadGraphics("inventoryMenuMain.png"), 100, 150, 100, 350);
 	Menu* levelEndMenu = new Menu(loadGraphics("inventoryMenuMain.png"), 100, 150, 300, 170);
+    Menu* deathMenu = new Menu(loadGraphics("inventoryMenuMain.png"), 100, 150, 300, 170);
     
     //Add inventory and battle menus
     menus.push_back(menuInventory);
     menus.push_back(battleMenu);
 	menus.push_back(levelEndMenu);
+    menus.push_back(deathMenu);
 
     //Load font from file
     menus[0]->setFont("PrStart.ttf", 20);
     menus[1]->setFont("PrStart.ttf", 20);
 	menus[2]->setFont("PrStart.ttf", 20);
+    menus[3]->setFont("PrStart.ttf", 20);
     
     //Inventory menu options
     menus[0]->addOption(renderer, "RESUME");
@@ -75,6 +78,10 @@ GameEngine::GameEngine(){
 	//End of level menu options
 	menus[2]->addOption(renderer, "NEXT");
 	menus[2]->addOption(renderer, "QUIT");
+
+    //Death options
+    menus[3]->addOption(renderer, "RESTART");
+    menus[3]->addOption(renderer, "QUIT");
     
     player.setSpriteSheet(loadGraphics("somersault.png"));
     
@@ -303,7 +310,7 @@ bool GameEngine::run(){
 
 			//Indicates player fell off platform and resets level
 			if (player.getyPos() > LEVEL_HEIGHT)
-				return true;
+				gameMode = PLAYER_DEATH;
         
             //center camera over the player
             camera.x = (player.getxPos() + player.getWidth() / 2) - SCREEN_WIDTH / 2;
@@ -463,7 +470,7 @@ bool GameEngine::run(){
                 if (monsters[battleMonsterIndex]->animate(4, renderer, staticCam.x, staticCam.y) == 1){
                     player.getHit(monsters[battleMonsterIndex]->attack()); //now based on stats
                     if (player.getHP() == 0)
-                        return true;
+                        gameMode = PLAYER_DEATH;
                     turn = PLAYERTURN;
                 }
             }
@@ -611,6 +618,69 @@ bool GameEngine::run(){
 			}
 			SDL_RenderPresent(renderer);
 		}
+        /***********************
+        * PLAYER DEATH SEGMENT *
+        ************************/
+        else if (gameMode == PLAYER_DEATH)
+        {
+            // Set background to standard black background, in case you died in combat
+            SDL_RenderClear(renderer);
+            level.setBG(0);
+
+            //render black background
+            level.renderBG(0, 0, &staticCam, renderer);
+
+            //menu draw
+            menus[3]->draw(renderer);
+
+            //set font color for texture string 
+            menus[3]->setColor(255, 0, 0);
+            SDL_Rect destRect = { SCREEN_WIDTH / 4 + 60, SCREEN_HEIGHT / 4 - 25, 300, 50 };
+            SDL_Texture* complete = menus[3]->renderString(renderer, "YOU DIED");
+
+            //present
+            SDL_RenderCopy(renderer, complete, NULL, &destRect);
+
+            while (SDL_PollEvent(&event) != 0)
+            {
+                //Check whether the user is trying to quit.
+                if (event.type == SDL_QUIT)
+                {
+                    running = false;
+                }
+
+                else if (event.type == SDL_KEYDOWN)
+                {
+                    switch (event.key.keysym.sym)
+                    {
+                    case SDLK_UP:
+                        menus[3]->cursorDecrement();
+                        break;
+                    case SDLK_DOWN:
+                        menus[3]->cursorIncrement();
+                        break;
+                    case SDLK_RETURN:
+                        switch (menus[3]->getCursorPos())
+                        {
+                        case Menu::PLAYER_DEATH_RESTART:
+                            nextLevel = true;
+                            return nextLevel;
+                            break;
+                        case Menu::PLAYER_DEATH_QUIT:
+                            running = false;
+                        default:
+                            break;
+                        }
+                        break;
+                    default:
+                        break;
+
+
+                    }
+                }
+            }
+            SDL_RenderPresent(renderer);
+        }
     }
 	return nextLevel;
 }

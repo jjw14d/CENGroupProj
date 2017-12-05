@@ -230,9 +230,9 @@ int Entity::getBaseAttack()
     return baseAttack;
 }
 
-int Entity::getBaseDefence()
+int Entity::getBaseDefense()
 {
-    return baseDefence;
+    return baseDefense;
 }
 
 /*
@@ -247,7 +247,7 @@ Player::Player() : Entity(){
 	hitPoints = 50;
 	maxHitPoints = 50;
 	baseAttack = 10;
-	baseDefence = 10;
+	baseDefense = 10;
 	exp = 0;
 	expToLevelUp = 25;
 }
@@ -258,7 +258,7 @@ Player::Player(double x, double y) : Entity(x,y){
 	hitPoints = 50;
 	maxHitPoints = 50;
 	baseAttack = 10;
-	baseDefence = 10;
+	baseDefense = 10;
 	exp = 0;
 	expToLevelUp = 25;
 }
@@ -277,16 +277,16 @@ void Player::levelUp()
 		maxHitPoints = maxHitPoints + 10;
 		hitPoints = hitPoints + 10; //give health boost for leveling up
 		baseAttack = baseAttack + 5;
-		baseDefence = baseDefence + 5;
+		baseDefense = baseDefense + 5;
 		expToLevelUp = expToLevelUp + 25;
 	}
 }
 
 void Player::getHit(int damage)
 {
-	if (damage > baseDefence)
+	if (damage > baseDefense)
 	{
-        decrementHitPoints(damage - baseDefence);
+        decrementHitPoints(damage - baseDefense);
 	}
 }
 
@@ -324,13 +324,13 @@ int Player::getExpToLevelUp()
 
 Monster::Monster() : Entity(){
     hitPoints = 25;
-	baseAttack = 20;
+	baseAttack = 35;
 	expValue = 25; //points for defeating it
 }
 
 Monster::Monster(double x, double y) : Entity(x,y){
     hitPoints = 25;
-	baseAttack = 20;
+	baseAttack = 35;
 	expValue = 25; //points for defeating it
 }
 
@@ -345,7 +345,7 @@ int Monster::attack()
 
 void Monster::getHit(int damage)
 {
-	hitPoints = hitPoints - damage;
+    decrementHitPoints(damage);
 }
 
 int Monster::getExpValue()

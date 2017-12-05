@@ -91,7 +91,7 @@ public:
 
     int getHP();
     int getBaseAttack();
-    int getBaseDefence();
+    int getBaseDefense();
 
     SDL_Texture* getTexture();
     SDL_Rect* getPos();
@@ -130,7 +130,7 @@ protected:
     //Battle related info
     int hitPoints;
     int baseAttack;
-    int baseDefence;
+    int baseDefense;
 };
 
 class Player : public Entity{

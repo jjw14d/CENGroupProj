@@ -30,7 +30,7 @@ public:
     const int SCREEN_HEIGHT = 480;
     
     //Flags for the current game segment
-    enum gameMode {PLATFORM, BATTLE, INVENTORY, LEVEL_END};
+    enum gameMode {PLATFORM, BATTLE, INVENTORY, LEVEL_END, PLAYER_DEATH};
     
     //Flags to indicate whose turn it is during the battle segment
     enum turn {PLAYERTURN, ENEMYTURN};

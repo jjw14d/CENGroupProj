@@ -17,6 +17,7 @@ public:
     enum pauseCommand {PAUSE_RESUME, PAUSE_ITEM, PAUSE_QUIT};
     enum battleCommand {BATTLE_FIGHT, BATTLE_ITEM, BATTLE_RUN};
 	enum levelEndCommand {LEVEL_END_NEXT, LEVEL_END_QUIT};
+    enum playerDeathCommand { PLAYER_DEATH_RESTART, PLAYER_DEATH_QUIT };
     
     struct menuOption{
         menuOption(SDL_Texture* t, unsigned int l){ text = t; length = l; }
