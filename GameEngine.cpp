@@ -437,7 +437,7 @@ bool GameEngine::run(){
                                         //Fight: subtract player's attack from the monster's HP. Exit if == 0.
                                         monsters[battleMonsterIndex]->getHit(player.attack()); //using new functions that reflect stats
                                         turn = ENEMYTURN;
-					if (monsters[battleMonsterIndex]->getHealth() <= 0)
+					if (monsters[battleMonsterIndex]->getHP() <= 0)
 					{
 						gameMode = PLATFORM;
 						player.addExp(monsters[battleMonsterIndex]->getExpValue());
@@ -462,13 +462,15 @@ bool GameEngine::run(){
                  */
                 if (monsters[battleMonsterIndex]->animate(4, renderer, staticCam.x, staticCam.y) == 1){
                     player.getHit(monsters[battleMonsterIndex]->attack()); //now based on stats
+                    if (player.getHP() == 0)
+                        return true;
                     turn = PLAYERTURN;
                 }
             }
             
             //update health bars
-            playerHealthBar.w = 2 * player.getCurrentHP();
-            monsterHealthBar.w = 4 * monsters[battleMonsterIndex]->getHealth(); //slightly changed to fit new functions and health values
+            playerHealthBar.w = 2 * player.getHP();
+            monsterHealthBar.w = 4 * monsters[battleMonsterIndex]->getHP(); //slightly changed to fit new functions and health values
 
             //re-render
             SDL_RenderClear(renderer);

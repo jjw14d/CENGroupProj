@@ -76,6 +76,7 @@ public:
     void decrementHitPoints(int decrement);
     void incrementHitPoints(int increment);
     
+
     /***********
      * GETTERS *
      ***********/
@@ -87,10 +88,14 @@ public:
     int getWidth();
     int bottom();
     int right();
+
     int getHP();
-    
+    int getBaseAttack();
+    int getBaseDefence();
+
     SDL_Texture* getTexture();
     SDL_Rect* getPos();
+
 protected:
     //Spritesheet containing animation frames
     
@@ -124,7 +129,8 @@ protected:
     
     //Battle related info
     int hitPoints;
-
+    int baseAttack;
+    int baseDefence;
 };
 
 class Player : public Entity{
@@ -142,10 +148,8 @@ public:
 
 	//accessors
 	int getLevel();
-	int getCurrentHP();
-	int getMaxHealth();
-	int getBaseAttack();
-	int getBaseDefence();
+	int getMaxHitPoints();
+	
 	int getCurrentExp();
 	int getExpToLevelUp();
  
@@ -153,10 +157,8 @@ private:
 	
 	//battle data
 	int level;
-	int currentHealth;
-	int maxHealth;
-	int baseAttack;
-	int baseDefence;
+	int maxHitPoints;
+	
 	int exp;
 	int expToLevelUp;
     
@@ -171,19 +173,13 @@ public:
     // Updates the monster's velocity according to its behavior.
     
     virtual void move() = 0;
-	
 	int attack(); //return damage based on monster attack
 	void getHit(int damage);
 
 	//accessors
-	int getHealth();
-	int getBaseAttack();
 	int getExpValue();
     
 private:
-	
-	int health;
-	int baseAttack;
 	int expValue;
 
 };
