@@ -6,8 +6,7 @@ GameEngine::GameEngine(){
     
     //Initialize member data
     running = true;
-	//winW = 800;
-	//winH = 1100;
+	
 	
     //add platforms for the player to stand on
     level.addTerrain(0, 400, 350, 20);
@@ -51,14 +50,17 @@ GameEngine::GameEngine(){
     //Initialize menus with texture, position, and dimensions
     Menu* menuInventory = new Menu(loadGraphics("inventoryMenuMain.png"), 100, 150, 300, 170);
     Menu* battleMenu = new Menu(loadGraphics("inventoryMenuMain.png"), 100, 150, 100, 350);
+	Menu* levelEndMenu = new Menu(loadGraphics("inventoryMenuMain.png"), 100, 150, 300, 170);
     
     //Add inventory and battle menus
     menus.push_back(menuInventory);
     menus.push_back(battleMenu);
+	menus.push_back(levelEndMenu);
 
     //Load font from file
     menus[0]->setFont("PrStart.ttf", 20);
     menus[1]->setFont("PrStart.ttf", 20);
+	menus[2]->setFont("PrStart.ttf", 20);
     
     //Inventory menu options
     menus[0]->addOption(renderer, "RESUME");
@@ -69,6 +71,10 @@ GameEngine::GameEngine(){
     menus[1]->addOption(renderer, "FIGHT");
     menus[1]->addOption(renderer, "ITEM");
     menus[1]->addOption(renderer, "RUN");
+
+	//End of level menu options
+	menus[2]->addOption(renderer, "NEXT");
+	menus[2]->addOption(renderer, "QUIT");
     
     player.setSpriteSheet(loadGraphics("somersault.png"));
     
@@ -125,15 +131,16 @@ GameEngine::~GameEngine(){
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();
+	
 }
 
-void GameEngine::run(){
+bool GameEngine::run(){
     
     /* The SDL_Event object will be used only to poll for
      * a quit event, and to handle player jumping. Keyboard input will be handled
      * later.
      */
-    
+	bool nextLevel = false;
     //Integer flag to indicate whether we are in battle mode or platform mode.
     int gameMode = PLATFORM;
     
@@ -288,6 +295,11 @@ void GameEngine::run(){
                     battleMonsterIndex = i;
                 }
             }
+
+			//Indicates the end of the level. The player reaching a given coordinate signals the levels end.
+			//Currently set to the LEVEL_WIDTH (x position of 1080)
+			if (player.getxPos() >= 1080)
+				gameMode = LEVEL_END;
         
             //center camera over the player
             camera.x = (player.getxPos() + player.getWidth() / 2) - SCREEN_WIDTH / 2;
@@ -529,7 +541,68 @@ void GameEngine::run(){
             //present
             SDL_RenderPresent(renderer);
         }
+		/***********************
+		* END OF LEVEL SEGMENT *
+		************************/
+		else if (gameMode == LEVEL_END)
+		{
+			SDL_RenderClear(renderer);
+			
+			//render black background
+			level.renderBG(0, 0, &staticCam, renderer);
+
+			//menu draw
+			menus[2]->draw(renderer);
+
+			//set font color for texture string 
+			menus[2]->setColor(255, 0, 0);
+			SDL_Rect destRect = { SCREEN_WIDTH / 4 + 60, SCREEN_HEIGHT / 4 - 25, 300, 50 };
+			SDL_Texture* complete = menus[2]->renderString(renderer, "LEVEL COMPLETE!");
+
+			//present
+			SDL_RenderCopy(renderer, complete, NULL, &destRect);
+
+			while (SDL_PollEvent(&event) != 0)
+			{
+				//Check whether the user is trying to quit.
+				if (event.type == SDL_QUIT)
+				{
+					running = false;
+				}
+
+				else if (event.type == SDL_KEYDOWN)
+				{
+					switch (event.key.keysym.sym)
+					{
+					case SDLK_UP:
+						menus[2]->cursorDecrement();
+						break;
+					case SDLK_DOWN:
+						menus[2]->cursorIncrement();
+						break;
+					case SDLK_RETURN:
+						switch (menus[2]->getCursorPos()) {
+						case Menu::LEVEL_END_NEXT:
+							nextLevel = true;
+							return nextLevel;
+							break;
+						case Menu::LEVEL_END_QUIT:
+							running = false;
+						default:
+							break;
+						}
+						break;
+					default:
+						break;
+
+
+					}
+				}
+			}
+			SDL_RenderPresent(renderer);
+		}
     }
+	return nextLevel;
 }
 
 //Checks for collsion between two SDL_Rect objects

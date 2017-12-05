@@ -3,8 +3,8 @@
 #define Entity_h
 
 #include <stdio.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 #include <tuple>
 #include <iostream>
 /* Defines parameters for any moving objects that can interact with one another.

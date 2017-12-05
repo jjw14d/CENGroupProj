@@ -7,9 +7,9 @@
 #include <vector>
 #include <string>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
 
 #include "Entity.h"
 #include "Level.h"
@@ -30,7 +30,7 @@ public:
     const int SCREEN_HEIGHT = 480;
     
     //Flags for the current game segment
-    enum gameMode {PLATFORM, BATTLE, INVENTORY};
+    enum gameMode {PLATFORM, BATTLE, INVENTORY, LEVEL_END};
     
     //Flags to indicate whose turn it is during the battle segment
     enum turn {PLAYERTURN, ENEMYTURN};
@@ -45,7 +45,7 @@ public:
     void init_TTF();
     
     //Runs the main game loop. This will run until the game exits.
-    void run();
+    bool run();
     
     
     /******* UTILITY FUNCTIONS ********
@@ -89,10 +89,7 @@ private:
     //Vector of in-game menus
     std::vector<Menu*> menus;
  
-    
-    //window dimensions
-    //int winW;
-	//int winH;
+ 
     
     //flag for the game loop
     bool running;
