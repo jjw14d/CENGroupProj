@@ -434,14 +434,18 @@ bool GameEngine::run(){
                                 switch (menus[1]->getCursorPos()) {
                                 
                                     case Menu::BATTLE_FIGHT:
-                                        //Fight: subtract 1 from the monster's HP. Exit if == 0.
-                                        monsters[battleMonsterIndex]->decrementHitPoints(4);
+                                        //Fight: subtract player's attack from the monster's HP. Exit if == 0.
+                                        monsters[battleMonsterIndex]->getHit(player.attack()); //using new functions that reflect stats
                                         turn = ENEMYTURN;
-                                        if (monsters[battleMonsterIndex]->getHP() == 0)
-                                            gameMode = PLATFORM;
+					if (monsters[battleMonsterIndex]->getHealth() <= 0)
+					{
+						gameMode = PLATFORM;
+						player.addExp(monsters[battleMonsterIndex]->getExpValue());
+					}
                                         break;
                                     case Menu::BATTLE_RUN:
                                         //Run: if the user flees the battle, return to the platform segment.
+					player.addExp((monsters[battleMonsterIndex]->getExpValue()) / 10); //give players a small exp amount for running
                                         gameMode = PLATFORM;
                                     default:
                                         break;
@@ -457,14 +461,14 @@ bool GameEngine::run(){
                  * let the player take their turn.
                  */
                 if (monsters[battleMonsterIndex]->animate(4, renderer, staticCam.x, staticCam.y) == 1){
-                    player.decrementHitPoints(1);
+                    player.getHit(monsters[battleMonsterIndex]->attack()); //now based on stats
                     turn = PLAYERTURN;
                 }
             }
             
             //update health bars
-            playerHealthBar.w = 10 * player.getHP();
-            monsterHealthBar.w = 10 * monsters[battleMonsterIndex]->getHP();
+            playerHealthBar.w = 2 * player.getCurrentHP();
+            monsterHealthBar.w = 4 * monsters[battleMonsterIndex]->getHealth(); //slightly changed to fit new functions and health values
 
             //re-render
             SDL_RenderClear(renderer);

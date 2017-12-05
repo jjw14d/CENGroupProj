@@ -134,8 +134,31 @@ public:
     //Constructor to initialize player position
     
     Player(double x, double y);
+	
+	int attack(); //return a damage value based on player's attack
+	void levelUp(); //will run inside addExp, to level up automatically
+	void getHit(int damage);
+	void addExp(int expValue);
+
+	//accessors
+	int getLevel();
+	int getCurrentHP();
+	int getMaxHealth();
+	int getBaseAttack();
+	int getBaseDefence();
+	int getCurrentExp();
+	int getExpToLevelUp();
  
 private:
+	
+	//battle data
+	int level;
+	int currentHealth;
+	int maxHealth;
+	int baseAttack;
+	int baseDefence;
+	int exp;
+	int expToLevelUp;
     
 };
 
@@ -148,8 +171,20 @@ public:
     // Updates the monster's velocity according to its behavior.
     
     virtual void move() = 0;
+	
+	int attack(); //return damage based on monster attack
+	void getHit(int damage);
+
+	//accessors
+	int getHealth();
+	int getBaseAttack();
+	int getExpValue();
     
 private:
+	
+	int health;
+	int baseAttack;
+	int expValue;
 
 };
 
