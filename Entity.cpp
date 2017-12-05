@@ -232,11 +232,95 @@ int Entity::getHP(){
  */
 
 Player::Player() : Entity(){
-    
+    //set stats for new game
+	level = 1;
+	currentHealth = 50;
+	maxHealth = 50;
+	baseAttack = 10;
+	baseDefence = 10;
+	exp = 0;
+	expToLevelUp = 25;
 }
 
 Player::Player(double x, double y) : Entity(x,y){
-    
+    //set stats for new game
+	level = 1;
+	currentHealth = 50;
+	maxHealth = 50;
+	baseAttack = 10;
+	baseDefence = 10;
+	exp = 0;
+	expToLevelUp = 25;
+}
+
+int Player::attack()
+{
+	return baseAttack;
+}
+
+void Player::levelUp()
+{
+	if (exp >= expToLevelUp)
+	{
+		exp = exp % expToLevelUp; //don't lose extra experience
+		level++;
+		maxHealth = maxHealth + 10;
+		currentHealth = currentHealth + 10; //give health boost for leveling up
+		baseAttack = baseAttack + 5;
+		baseDefence = baseDefence + 5;
+		expToLevelUp = expToLevelUp + 25;
+	}
+}
+
+void Player::getHit(int damage)
+{
+	if (damage > baseDefence)
+	{
+		currentHealth = currentHealth - (damage - baseDefence);
+	}
+}
+
+void Player::addExp(int expValue)
+{
+	exp = exp + expValue;
+	levelUp();
+}
+
+//accessors
+
+int Player::getLevel()
+{
+	return level;
+}
+
+int Player::getCurrentHP()
+{
+	return currentHealth;
+}
+
+int Player::getMaxHealth()
+{
+	return maxHealth;
+}
+
+int Player::getBaseAttack()
+{
+	return baseAttack;
+}
+
+int Player::getBaseDefence()
+{
+	return baseDefence;
+}
+
+int Player::getCurrentExp()
+{
+	return exp;
+}
+
+int Player::getExpToLevelUp()
+{
+	return expToLevelUp;
 }
 
 /*
@@ -246,15 +330,44 @@ Player::Player(double x, double y) : Entity(x,y){
  */
 
 Monster::Monster() : Entity(){
-    
+    	health = 25;
+	baseAttack = 2;
+	expValue = 25; //points for defeating it
 }
 
 Monster::Monster(double x, double y) : Entity(x,y){
-    
+    	health = 25;
+	baseAttack = 2;
+	expValue = 25; //points for defeating it
 }
 
 Monster::~Monster(){
     
+}
+
+int Monster::attack()
+{
+	return baseAttack;
+}
+
+void Monster::getHit(int damage)
+{
+	health = health - damage;
+}
+
+int Monster::getHealth()
+{
+	return health;
+}
+
+int Monster::getBaseAttack()
+{
+	return baseAttack;
+}
+
+int Monster::getExpValue()
+{
+	return expValue;
 }
 
 /*
