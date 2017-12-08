@@ -174,8 +174,8 @@ void Entity::decrementHitPoints(int decrement){
 
 void Entity::incrementHitPoints(int increment){
     hitPoints += increment;
-    if (hitPoints > 10)
-        hitPoints = 0;
+    //if (hitPoints > 10)
+        //hitPoints = 0;
 }
 
 /***********
@@ -263,9 +263,26 @@ Player::Player(double x, double y) : Entity(x,y){
 	expToLevelUp = 25;
 }
 
+bool Player::attackSuccess()
+{
+	int roll = ((rand() % 100) + 1); //get a random number between 1 and 100
+	int missThreshold = 95; //base 95% chance to hit
+	if (roll < missThreshold)
+		return true;
+	else
+		return false;
+}
+
 int Player::attack()
 {
-	return baseAttack;
+	int roll = ((rand() % 20) + 1); //get a random number between 1 and 20
+	if (roll < 20)
+	{
+		roll = roll - 10;
+		return (baseAttack + roll); //do bonus damage on rolls above 10, damage penalty on rolls below
+	}
+	else if (roll == 20)
+		return (baseAttack * 2); //Critical Hit!
 }
 
 void Player::levelUp()
@@ -323,14 +340,14 @@ int Player::getExpToLevelUp()
  */
 
 Monster::Monster() : Entity(){
-    hitPoints = 25;
-	baseAttack = 35;
+    	hitPoints = 50;
+	baseAttack = 20;
 	expValue = 25; //points for defeating it
 }
 
 Monster::Monster(double x, double y) : Entity(x,y){
-    hitPoints = 25;
-	baseAttack = 35;
+    	hitPoints = 50;
+	baseAttack = 20;
 	expValue = 25; //points for defeating it
 }
 
@@ -338,14 +355,37 @@ Monster::~Monster(){
     
 }
 
+bool Monster::attackSuccess(Player &player)
+{
+	int roll = ((rand() % 100) + 1); //get a random number between 1 and 100
+	int missThreshold = 80 - (player.getBaseDefense()); //take player's defense into account, with a base 80% chance to hit
+	if (roll < missThreshold)
+		return true;
+	else
+		return false;
+}
+
 int Monster::attack()
 {
-	return baseAttack;
+	int roll = ((rand() % 20) + 1); //get a random number between 1 and 20
+	roll = roll - 10;
+	return (baseAttack + roll); //do bonus damage on rolls above 10, damage penalty on rolls below
 }
 
 void Monster::getHit(int damage)
 {
     decrementHitPoints(damage);
+}
+
+void Monster::healSelf()
+{
+	int roll = ((rand() % 100) + 1); 
+	int healThreshold = 30; //give the monster a 30% chance to heal itself
+	if (roll < healThreshold)
+	{
+		roll = ((rand() % 5) + 1); //between 1 and 5
+		incrementHitPoints(5 + roll);
+	}
 }
 
 int Monster::getExpValue()
