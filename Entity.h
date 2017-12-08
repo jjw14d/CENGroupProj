@@ -7,6 +7,8 @@
 #include <SDL_image.h>
 #include <tuple>
 #include <iostream>
+#include <cstdlib>//
+#include <ctime> // including these two for randomization, actually seeded in main
 /* Defines parameters for any moving objects that can interact with one another.
  * this includes monsters as well as the player character.
  */
