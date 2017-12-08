@@ -17,6 +17,7 @@ int main(int argc, const char * argv[]) {
 	*/
 	bool nextLevel = true;
 	
+	srand(time(NULL)); //seed random number generator
 	
 	while(nextLevel == 1)
 	{
