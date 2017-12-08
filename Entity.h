@@ -141,6 +141,7 @@ public:
     
     Player(double x, double y);
 	
+	bool attackSuccess(); //return true if there is a hit
 	int attack(); //return a damage value based on player's attack
 	void levelUp(); //will run inside addExp, to level up automatically
 	void getHit(int damage);
@@ -173,8 +174,11 @@ public:
     // Updates the monster's velocity according to its behavior.
     
     virtual void move() = 0;
+	
+	bool attackSuccess(Player &player); //return true if attack is a success
 	int attack(); //return damage based on monster attack
 	void getHit(int damage);
+	void healSelf(); //give the monster a chance to heal itself at low HP
 
 	//accessors
 	int getExpValue();
