@@ -441,8 +441,11 @@ bool GameEngine::run(){
                                 switch (menus[1]->getCursorPos()) {
                                 
                                     case Menu::BATTLE_FIGHT:
-                                        //Fight: subtract player's attack from the monster's HP. Exit if == 0.
-                                        monsters[battleMonsterIndex]->getHit(player.attack()); //using new functions that reflect stats
+                                       //Fight: subtract player's attack from the monster's HP. Exit if == 0.
+					if (player.attackSuccess()) //check if attack hits
+					{
+						monsters[battleMonsterIndex]->getHit(player.attack()); //using new functions that reflect stats
+					}
                                         turn = ENEMYTURN;
 					if (monsters[battleMonsterIndex]->getHP() <= 0)
 					{
@@ -468,7 +471,17 @@ bool GameEngine::run(){
                  * let the player take their turn.
                  */
                 if (monsters[battleMonsterIndex]->animate(4, renderer, staticCam.x, staticCam.y) == 1){
-                    player.getHit(monsters[battleMonsterIndex]->attack()); //now based on stats
+                    if (monsters[battleMonsterIndex]->getHP() <= 15) //monster has a chance to heal itself at low hp
+			{
+				monsters[battleMonsterIndex]->healSelf(); 
+			}
+		    else
+		    	{
+				if (monsters[battleMonsterIndex]->attackSuccess(player))
+				{
+					player.getHit(monsters[battleMonsterIndex]->attack()); //now based on stats
+				}
+			}
                     if (player.getHP() == 0)
                         gameMode = PLAYER_DEATH;
                     turn = PLAYERTURN;
@@ -477,7 +490,7 @@ bool GameEngine::run(){
             
             //update health bars
             playerHealthBar.w = 2 * player.getHP();
-            monsterHealthBar.w = 4 * monsters[battleMonsterIndex]->getHP(); //slightly changed to fit new functions and health values
+            monsterHealthBar.w = 2 * monsters[battleMonsterIndex]->getHP(); //slightly changed to fit new functions and health values
 
             //re-render
             SDL_RenderClear(renderer);
